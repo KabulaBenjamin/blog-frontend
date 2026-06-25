@@ -29,6 +29,9 @@ function PostCard({ post, user, onUpdated, onDeleted }) {
     }
   };
 
+  // Debugging logs (optional)
+  console.log("Post:", post, "User:", user);
+
   return (
     <div className="post-card">
       {editing ? (
@@ -43,7 +46,7 @@ function PostCard({ post, user, onUpdated, onDeleted }) {
           <h3>{post.title}</h3>
           <p><strong>{post.username || `User ${post.user_id}`}</strong></p>
           <p>{post.content}</p>
-          {user && user.id === post.user_id && (
+          {user && (user.id === post.user_id || user.user_id === post.user_id) && (
             <div className="actions">
               <button onClick={() => setEditing(true)}>Edit</button>
               <button onClick={handleDelete}>Delete</button>
