@@ -1,0 +1,39 @@
+.post-card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.title {
+  font-size: 20px;
+  margin: 8px 0;
+}
+
+.meta {
+  color: #999;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.preview {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #555;
+}
+
+.post-media {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
