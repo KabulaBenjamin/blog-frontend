@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './PostCard.css';
+import ReactMarkdown from 'react-markdown';
 
 function PostCard({ post, onUpdated, onDeleted }) {
   const [editing, setEditing] = useState(false);
@@ -13,6 +14,7 @@ function PostCard({ post, onUpdated, onDeleted }) {
       const formData = new FormData();
       formData.append('title', title);
       formData.append('content', content);
+      formData.append('editor_type', post.editor_type || 'quill');
       if (file) formData.append('file', file);
       if (liveLink) formData.append('live_link', liveLink);
 
@@ -37,6 +39,19 @@ function PostCard({ post, onUpdated, onDeleted }) {
     }
   };
 
+  const renderContent = () => {
+    switch (post.editor_type) {
+      case 'markdown':
+        return <ReactMarkdown>{post.content}</ReactMarkdown>;
+      case 'html':
+      case 'quill':
+        return <div dangerouslySetInnerHTML={{ __html: post.content }} />;
+      case 'normal':
+      default:
+        return <p>{post.content}</p>;
+    }
+  };
+
   return (
     <div className="post-card">
       {editing ? (
@@ -44,11 +59,11 @@ function PostCard({ post, onUpdated, onDeleted }) {
           <input value={title} onChange={e => setTitle(e.target.value)} />
           <textarea value={content} onChange={e => setContent(e.target.value)} />
           <input type="file" onChange={e => setFile(e.target.files[0])} />
-          <input 
-            type="text" 
-            placeholder="Live link" 
-            value={liveLink} 
-            onChange={e => setLiveLink(e.target.value)} 
+          <input
+            type="text"
+            placeholder="Live link"
+            value={liveLink}
+            onChange={e => setLiveLink(e.target.value)}
           />
           <button onClick={handleUpdate}>Save</button>
           <button onClick={() => setEditing(false)}>Cancel</button>
@@ -57,13 +72,17 @@ function PostCard({ post, onUpdated, onDeleted }) {
         <>
           <h3 className="title">{post.title}</h3>
           <p className="meta">by {post.username} • {new Date(post.created_at).toLocaleString()}</p>
+
           {post.media_url && post.media_url.endsWith('.mp4') ? (
             <video controls src={post.media_url} className="post-media"></video>
           ) : post.media_url ? (
             <img src={post.media_url} alt={post.title} className="post-media" />
           ) : null}
+
           {post.live_link && <a href={post.live_link} target="_blank" rel="noopener noreferrer">Watch Live</a>}
-          <p className="preview">{post.content}</p>
+
+          <div className="preview">{renderContent()}</div>
+
           <div className="actions">
             <span>❤️ {post.likes || 0}</span>
             <span>💬 {post.comments || 0}</span>
