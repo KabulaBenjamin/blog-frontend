@@ -4,6 +4,7 @@ import Home from './components/Home';
 import Profile from './components/Profile';
 import NewPost from './components/NewPost';
 import Footer from './components/Footer';
+import BottomNav from './components/BottomNav';
 import './App.css';
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
         </Routes>
       </div>
       <Footer />
+      <BottomNav user={user} setUser={setUser} />
     </Router>
   );
 }
