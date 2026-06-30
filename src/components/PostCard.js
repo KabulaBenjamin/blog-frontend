@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './PostCard.css';
 import ReactMarkdown from 'react-markdown';
 
-function PostCard({ post, onUpdated, onDeleted }) {
+function PostCard({ post, user, onUpdated, onDeleted }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(post.title);
   const [content, setContent] = useState(post.content);
@@ -52,6 +52,11 @@ function PostCard({ post, onUpdated, onDeleted }) {
     }
   };
 
+  // Superuser IDs (adjust as needed)
+  const superusers = [1]; // e.g., user with id=1 is superuser
+  const canEditOrDelete =
+    user && (user.id === post.user_id || superusers.includes(user.id));
+
   return (
     <div className="post-card">
       {editing ? (
@@ -87,8 +92,12 @@ function PostCard({ post, onUpdated, onDeleted }) {
             <span>❤️ {post.likes || 0}</span>
             <span>💬 {post.comments || 0}</span>
             <span>↗ Share</span>
-            <button onClick={() => setEditing(true)}>Edit</button>
-            <button onClick={handleDelete}>Delete</button>
+            {canEditOrDelete && (
+              <>
+                <button onClick={() => setEditing(true)}>Edit</button>
+                <button onClick={handleDelete}>Delete</button>
+              </>
+            )}
           </div>
         </>
       )}
