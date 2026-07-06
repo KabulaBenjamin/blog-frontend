@@ -92,3 +92,15 @@ footer a:hover {
 .profile-options button:hover {
   background: #0056b3;
 }
+
+/* Ensure BottomNav is always visible */
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 60px; /* leave room for nav bar */
+}
+
+main {
+  flex: 1;
+}

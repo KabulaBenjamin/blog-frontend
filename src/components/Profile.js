@@ -1,92 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import PostCard from './PostCard';
 
-function Profile({ user, setUser }) {
-  const [mode, setMode] = useState(null); // "signin" or "signup"
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+function Profile({ user }) {
+  const [posts, setPosts] = useState([]);
+  const [stats, setStats] = useState({ total_likes: 0, total_comments: 0, total_posts: 0 });
 
-  // Auto-fetch user details if logged in
   useEffect(() => {
-    if (user) {
-      fetch(`https://blog-2y55.onrender.com/me/${user.id}`)
-        .then(res => res.json())
-        .then(data => setUser(data))
-        .catch(err => console.error('Fetch /me error:', err));
-    }
-  }, [user, setUser]);
+    if (!user) return;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const endpoint = mode === 'signin' ? '/signin' : '/signup';
-      const res = await fetch(`https://blog-2y55.onrender.com${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      const data = await res.json();
-      if (data.success || data.id) {
-        const loggedUser = data.user || data;
-        setUser(loggedUser);
-        window.location.href = '/new';
-      } else {
-        alert(data.error || 'Login failed');
-      }
-    } catch (err) {
-      console.error('Profile error:', err);
-      alert('Server error, please try again.');
-    }
-  };
+    // Fetch user's posts
+    fetch(`https://blog-2y55.onrender.com/users/${user.id}/posts`)
+      .then(res => res.json())
+      .then(data => setPosts(data))
+      .catch(err => console.error('Failed to fetch user posts:', err));
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    window.location.href = '/';
-  };
+    // Fetch user's stats
+    fetch(`https://blog-2y55.onrender.com/users/${user.id}/stats`)
+      .then(res => res.json())
+      .then(data => setStats(data))
+      .catch(err => console.error('Failed to fetch user stats:', err));
+  }, [user]);
 
-  if (user) {
-    return (
-      <div className="profile">
-        <h2>Welcome, {user.username}</h2>
-        <p>User ID: {user.id}</p>
-        <button onClick={() => window.location.href = '/new'}>Create a Post</button>
-        <button onClick={handleLogout}>Logout</button>
-      </div>
-    );
-  }
+  if (!user) return <p>Please log in to view your profile.</p>;
 
   return (
     <div className="profile">
-      <h2>Profile</h2>
-
-      {!mode && (
-        <div className="profile-options">
-          <button onClick={() => setMode('signin')}>Sign In</button>
-          <button onClick={() => setMode('signup')}>Create Account</button>
-        </div>
-      )}
-
-      {mode && (
-        <form onSubmit={handleSubmit}>
-          <h3>{mode === 'signin' ? 'Sign In' : 'Create Account'}</h3>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button type="submit">Continue</button>
-          <button type="button" onClick={() => setMode(null)}>Back</button>
-        </form>
-      )}
+      <h2>{user.username}'s Profile</h2>
+      <div className="stats">
+        <p>Total Posts: {stats.total_posts}</p>
+        <p>Total Likes: {stats.total_likes}</p>
+        <p>Total Comments: {stats.total_comments}</p>
+      </div>
+      <div className="user-posts">
+        {posts.length === 0 ? (
+          <p>No posts yet.</p>
+        ) : (
+          posts.map(post => (
+            <PostCard
+              key={post.id}
+              post={post}
+              user={user}
+              onUpdated={(updated) => setPosts(posts.map(p => p.id === updated.id ? updated : p))}
+              onDeleted={(id) => setPosts(posts.filter(p => p.id !== id))}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 }

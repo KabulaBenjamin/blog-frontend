@@ -1,106 +1,76 @@
-import React, { useState } from 'react';
-import './PostCard.css';
-import ReactMarkdown from 'react-markdown';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function PostCard({ post, user, onUpdated, onDeleted }) {
-  const [editing, setEditing] = useState(false);
-  const [title, setTitle] = useState(post.title);
-  const [content, setContent] = useState(post.content);
-  const [file, setFile] = useState(null);
-  const [liveLink, setLiveLink] = useState(post.live_link || '');
+  const navigate = useNavigate();
 
-  const handleUpdate = async () => {
+  const handleLike = async () => {
     try {
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('content', content);
-      formData.append('editor_type', post.editor_type || 'quill');
-      if (file) formData.append('file', file);
-      if (liveLink) formData.append('live_link', liveLink);
-
-      const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}`, {
-        method: 'PUT',
-        body: formData
-      });
+      const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}/like`, { method: 'POST' });
       const updated = await res.json();
       onUpdated(updated);
-      setEditing(false);
     } catch (err) {
-      console.error('Update failed:', err);
+      console.error('Like failed:', err);
+    }
+  };
+
+  const handleComment = async () => {
+    try {
+      const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}/comment`, { method: 'POST' });
+      const updated = await res.json();
+      onUpdated(updated);
+    } catch (err) {
+      console.error('Comment failed:', err);
     }
   };
 
   const handleDelete = async () => {
     try {
-      await fetch(`https://blog-2y55.onrender.com/posts/${post.id}`, { method: 'DELETE' });
-      onDeleted(post.id);
+      const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}`, { method: 'DELETE' });
+      const result = await res.json();
+      if (result.success) {
+        onDeleted(post.id);
+      }
     } catch (err) {
       console.error('Delete failed:', err);
     }
   };
 
-  const renderContent = () => {
-    switch (post.editor_type) {
-      case 'markdown':
-        return <ReactMarkdown>{post.content}</ReactMarkdown>;
-      case 'html':
-      case 'quill':
-        return <div dangerouslySetInnerHTML={{ __html: post.content }} />;
-      case 'normal':
-      default:
-        return <p>{post.content}</p>;
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: post.title,
+        text: post.content.replace(/<[^>]+>/g, '').slice(0, 100) + '...',
+        url: window.location.href
+      });
+    } else {
+      alert('Sharing not supported in this browser.');
     }
   };
 
-  // Superuser IDs (adjust as needed)
-  const superusers = [1]; // e.g., user with id=1 is superuser
-  const canEditOrDelete =
-    user && (user.id === post.user_id || superusers.includes(user.id));
-
   return (
     <div className="post-card">
-      {editing ? (
-        <>
-          <input value={title} onChange={e => setTitle(e.target.value)} />
-          <textarea value={content} onChange={e => setContent(e.target.value)} />
-          <input type="file" onChange={e => setFile(e.target.files[0])} />
-          <input
-            type="text"
-            placeholder="Live link"
-            value={liveLink}
-            onChange={e => setLiveLink(e.target.value)}
-          />
-          <button onClick={handleUpdate}>Save</button>
-          <button onClick={() => setEditing(false)}>Cancel</button>
-        </>
-      ) : (
-        <>
-          <h3 className="title">{post.title}</h3>
-          <p className="meta">by {post.username} • {new Date(post.created_at).toLocaleString()}</p>
-
-          {post.media_url && post.media_url.endsWith('.mp4') ? (
-            <video controls src={post.media_url} className="post-media"></video>
-          ) : post.media_url ? (
-            <img src={post.media_url} alt={post.title} className="post-media" />
-          ) : null}
-
-          {post.live_link && <a href={post.live_link} target="_blank" rel="noopener noreferrer">Watch Live</a>}
-
-          <div className="preview">{renderContent()}</div>
-
-          <div className="actions">
-            <span>❤️ {post.likes || 0}</span>
-            <span>💬 {post.comments || 0}</span>
-            <span>↗ Share</span>
-            {canEditOrDelete && (
-              <>
-                <button onClick={() => setEditing(true)}>Edit</button>
-                <button onClick={handleDelete}>Delete</button>
-              </>
-            )}
-          </div>
-        </>
+      <h2>{post.title}</h2>
+      <div dangerouslySetInnerHTML={{ __html: post.content }} />
+      {post.live_link && (
+        <p>
+          <a href={post.live_link} target="_blank" rel="noopener noreferrer">Live Link</a>
+        </p>
       )}
+      <p><strong>By:</strong> {post.username}</p>
+      <p>👍 {post.likes || 0} | 💬 {post.comments || 0}</p>
+
+      <div className="actions">
+        <button onClick={handleLike}>Like</button>
+        <button onClick={handleComment}>Comment</button>
+        <button onClick={handleShare}>Share</button>
+        {user && (user.id === post.user_id) && (
+          <>
+            <button onClick={() => navigate(`/edit/${post.id}`)}>Edit</button>
+            <button onClick={handleDelete}>Delete</button>
+          </>
+        )}
+      </div>
     </div>
   );
 }

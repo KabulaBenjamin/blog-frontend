@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './App.css';
 import PostCard from './components/PostCard';
 import BottomNav from './components/BottomNav';
@@ -46,8 +46,10 @@ function EditWrapper({ user, onSaved }) {
 function App() {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
+  
+  // Track active connection state across React Dev re-renders
+  const wsRef = useRef(null);
 
-  // Core synchronous updating hooks
   const handleUpdated = (updatedPost) => {
     setPosts(prevPosts => prevPosts.map(p => p.id === updatedPost.id ? updatedPost : p));
   };
@@ -68,7 +70,7 @@ function App() {
   };
 
   useEffect(() => {
-    // 1. Core HTTP Feed Hydration
+    // 1. Initial HTTP Fetch for Posts
     fetch('https://blog-2y55.onrender.com/posts')
       .then(res => res.json())
       .then(data => setPosts(Array.isArray(data) ? data : []))
@@ -77,41 +79,71 @@ function App() {
         setPosts([]);
       });
 
-    // 2. Auth state hydration
+    // 2. Hydrate Auth State
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
 
-    // 3. Fixed WebSocket connection without /ws route parameter for stable Render proxying
-    const ws = new WebSocket('wss://blog-2y55.onrender.com');
+    // 3. Resilient Singleton WebSocket Loop
+    let reconnectTimeout;
 
-    ws.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        
-        switch (message.action) {
-          case 'CREATE':
-            setPosts(prev => [message.post, ...prev]);
-            break;
-          case 'UPDATE':
-            setPosts(prev => prev.map(p => p.id === message.post.id ? message.post : p));
-            break;
-          case 'DELETE':
-            setPosts(prev => prev.filter(p => p.id !== message.id));
-            break;
-          default:
-            break;
-        }
-      } catch (err) {
-        console.error('WebSocket parsing error:', err);
+    const connectWebSocket = () => {
+      // Avoid spinning up duplicate sockets if one is already connecting/connected
+      if (wsRef.current && (wsRef.current.readyState === WebSocket.CONNECTING || wsRef.current.readyState === WebSocket.OPEN)) {
+        return;
       }
+
+      const ws = new WebSocket('wss://blog-2y55.onrender.com');
+      wsRef.current = ws;
+
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          switch (message.action) {
+            case 'CREATE':
+              setPosts(prev => [message.post, ...prev]);
+              break;
+            case 'UPDATE':
+              setPosts(prev => prev.map(p => p.id === message.post.id ? message.post : p));
+              break;
+            case 'DELETE':
+              setPosts(prev => prev.filter(p => p.id !== message.id));
+              break;
+            default:
+              break;
+          }
+        } catch (err) {
+          console.error('WebSocket parsing error:', err);
+        }
+      };
+
+      ws.onclose = (e) => {
+        // Clean up tracking reference
+        wsRef.current = null;
+        console.log(`🔌 WebSocket connection dropped (${e.reason || 'No reason specified'}). Retrying in 5s...`);
+        
+        reconnectTimeout = setTimeout(() => {
+          connectWebSocket();
+        }, 5000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error registered:', error);
+        ws.close();
+      };
     };
 
-    ws.onerror = (error) => console.error('WebSocket Error:', error);
-    
+    connectWebSocket();
+
     return () => {
-      ws.close();
+      clearTimeout(reconnectTimeout);
+      if (wsRef.current) {
+        // Prevent reconnect loops from firing during unmount
+        wsRef.current.onclose = null; 
+        wsRef.current.close();
+        wsRef.current = null;
+      }
     };
   }, []);
 
@@ -124,7 +156,6 @@ function App() {
         
         <main>
           <Routes>
-            {/* Core Feed Route */}
             <Route
               path="/"
               element={
@@ -142,20 +173,16 @@ function App() {
               }
             />
 
-            {/* Application Views */}
             <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
             <Route path="/search" element={<Search />} />
             <Route path="/notifications" element={<Notifications user={user} />} />
             
-            {/* Post Modifiers */}
             <Route path="/new" element={<QuillEditor user={user} onSaved={handleSaved} />} />
             <Route path="/edit/:id" element={<EditWrapper user={user} onSaved={handleSaved} />} />
 
-            {/* Authentication Routing */}
             <Route path="/signin" element={<Signin setUser={setUser} />} />
             <Route path="/signup" element={<Signup setUser={setUser} />} />
 
-            {/* Legal Footers */}
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/terms" element={<Terms />} />
