@@ -16,6 +16,7 @@ import About from './components/About';
 import Contact from './components/Contact';
 import Terms from './components/Terms';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import Settings from './components/Settings';
 
 import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 
@@ -182,6 +183,7 @@ function App() {
 
             <Route path="/signin" element={<Signin setUser={setUser} />} />
             <Route path="/signup" element={<Signup setUser={setUser} />} />
+            <Route path="/settings" element={<Settings user={user} />} />
 
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
