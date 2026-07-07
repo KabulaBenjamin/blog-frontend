@@ -104,3 +104,11 @@ footer a:hover {
 main {
   flex: 1;
 }
+.dark-theme {
+  background-color: #121212;
+  color: #ffffff;
+}
+.dark-theme header, .dark-theme .quill-editor, .dark-theme input {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}

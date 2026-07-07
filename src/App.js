@@ -7,6 +7,9 @@ import Profile from './components/Profile';
 import QuillEditor from './components/QuillEditor';
 import Loader from './components/Loader';
 
+// Global Consent Layer
+import CookieConsent from './components/CookieConsent'; 
+
 // Dynamic components directory routes
 import Signin from './components/Signin';
 import Signup from './components/Signup';
@@ -20,6 +23,7 @@ import Settings from './components/Settings';
 
 import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 
+// Wrapper to handle pulling single posts safely for the text editor lifecycle
 function EditWrapper({ user, onSaved }) {
   const { id } = useParams();
   const [post, setPost] = useState(null);
@@ -48,7 +52,7 @@ function App() {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
   
-  // Track active connection state across React Dev re-renders
+  // Persistent reference to track a singular active WebSocket instance across re-renders
   const wsRef = useRef(null);
 
   const handleUpdated = (updatedPost) => {
@@ -71,26 +75,25 @@ function App() {
   };
 
   useEffect(() => {
-    // 1. Initial HTTP Fetch for Posts
+    // 1. Initial HTTP Fetch for Core Posts Feed
     fetch('https://blog-2y55.onrender.com/posts')
       .then(res => res.json())
       .then(data => setPosts(Array.isArray(data) ? data : []))
       .catch(err => {
-        console.error(err);
+        console.error('Initial feed load failure:', err);
         setPosts([]);
       });
 
-    // 2. Hydrate Auth State
+    // 2. Local Authentication Hydration
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
 
-    // 3. Resilient Singleton WebSocket Loop pointing to custom /websocket proxy
+    // 3. Resilient WebSocket Handshake Lifecycle Loop
     let reconnectTimeout;
 
     const connectWebSocket = () => {
-      // Avoid spinning up duplicate sockets if one is already connecting/connected
       if (wsRef.current && (wsRef.current.readyState === WebSocket.CONNECTING || wsRef.current.readyState === WebSocket.OPEN)) {
         return;
       }
@@ -120,7 +123,6 @@ function App() {
       };
 
       ws.onclose = (e) => {
-        // Clean up tracking reference
         wsRef.current = null;
         console.log(`🔌 WebSocket connection dropped (${e.reason || 'No reason specified'}). Retrying in 5s...`);
         
@@ -140,7 +142,6 @@ function App() {
     return () => {
       clearTimeout(reconnectTimeout);
       if (wsRef.current) {
-        // Prevent reconnect loops from firing during unmount
         wsRef.current.onclose = null; 
         wsRef.current.close();
         wsRef.current = null;
@@ -157,6 +158,7 @@ function App() {
         
         <main>
           <Routes>
+            {/* Core Feed Route */}
             <Route
               path="/"
               element={
@@ -174,17 +176,32 @@ function App() {
               }
             />
 
+            {/* Application Feature Routes */}
             <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
-            <Route path="/search" element={<Search />} />
             <Route path="/notifications" element={<Notifications user={user} />} />
+            <Route path="/settings" element={<Settings user={user} />} />
             
+            {/* ✅ FIXED: High-Efficiency Search matching structural prop criteria */}
+            <Route 
+              path="/search" 
+              element={
+                <Search 
+                  user={user} 
+                  onUpdated={handleUpdated} 
+                  onDeleted={handleDeleted} 
+                />
+              } 
+            />
+            
+            {/* Editor Content Pipelines */}
             <Route path="/new" element={<QuillEditor user={user} onSaved={handleSaved} />} />
             <Route path="/edit/:id" element={<EditWrapper user={user} onSaved={handleSaved} />} />
 
+            {/* Authentication Nodes */}
             <Route path="/signin" element={<Signin setUser={setUser} />} />
             <Route path="/signup" element={<Signup setUser={setUser} />} />
-            <Route path="/settings" element={<Settings user={user} />} />
 
+            {/* Static Legal Disclosures & App Context Pages */}
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/terms" element={<Terms />} />
@@ -192,8 +209,12 @@ function App() {
           </Routes>
         </main>
         
+        {/* Navigational Anchors */}
         <BottomNav user={user} />
         <Footer />
+        
+        {/* Global Modal/Banner Overlays */}
+        <CookieConsent /> 
       </div>
     </Router>
   );
