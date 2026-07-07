@@ -85,7 +85,7 @@ function App() {
       setUser(JSON.parse(storedUser));
     }
 
-    // 3. Resilient Singleton WebSocket Loop
+    // 3. Resilient Singleton WebSocket Loop pointing to custom /websocket proxy
     let reconnectTimeout;
 
     const connectWebSocket = () => {
@@ -94,7 +94,7 @@ function App() {
         return;
       }
 
-      const ws = new WebSocket('wss://blog-2y55.onrender.com');
+      const ws = new WebSocket('wss://blog-2y55.onrender.com/websocket');
       wsRef.current = ws;
 
       ws.onmessage = (event) => {
