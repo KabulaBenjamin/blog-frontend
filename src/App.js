@@ -21,7 +21,8 @@ import Terms from './components/Terms';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import Settings from './components/Settings';
 
-import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
+// Added Navigate here to protect client-side routes gracefully
+import { BrowserRouter as Router, Routes, Route, useParams, Navigate } from 'react-router-dom';
 
 // Wrapper to handle pulling single posts safely for the text editor lifecycle
 function EditWrapper({ user, onSaved }) {
@@ -170,7 +171,7 @@ function App() {
                       user={user}
                       onUpdated={handleUpdated}
                       onDeleted={handleDeleted}
-                    />
+                      />
                   ))}
                 </div>
               }
@@ -181,7 +182,7 @@ function App() {
             <Route path="/notifications" element={<Notifications user={user} />} />
             <Route path="/settings" element={<Settings user={user} />} />
             
-            {/* ✅ FIXED: High-Efficiency Search matching structural prop criteria */}
+            {/* High-Efficiency Search matching structural prop criteria */}
             <Route 
               path="/search" 
               element={
@@ -193,13 +194,22 @@ function App() {
               } 
             />
             
-            {/* Editor Content Pipelines */}
-            <Route path="/new" element={<QuillEditor user={user} onSaved={handleSaved} />} />
+            {/* Editor Content Pipelines (Protected Route Enforced below) */}
+            <Route 
+              path="/new" 
+              element={
+                user ? (
+                  <QuillEditor user={user} onSaved={handleSaved} />
+                ) : (
+                  <Navigate to="/signin" replace />
+                )
+              } 
+            />
             <Route path="/edit/:id" element={<EditWrapper user={user} onSaved={handleSaved} />} />
 
-            {/* Authentication Nodes */}
-            <Route path="/signin" element={<Signin setUser={setUser} />} />
-            <Route path="/signup" element={<Signup setUser={setUser} />} />
+            {/* Authentication Nodes — Aligned to look for custom handler hooks */}
+            <Route path="/signin" element={<Signin onSignedIn={setUser} />} />
+            <Route path="/signup" element={<Signup onSignedUp={setUser} />} />
 
             {/* Static Legal Disclosures & App Context Pages */}
             <Route path="/about" element={<About />} />
