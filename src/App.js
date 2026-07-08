@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import Profile from './components/Profile';
 import QuillEditor from './components/QuillEditor';
 import Loader from './components/Loader';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Global Consent Layer
 import CookieConsent from './components/CookieConsent'; 
@@ -152,80 +153,83 @@ function App() {
 
   return (
     <Router>
-      <div className="App">
-        <header className="header">
-          <h1>Koikoi Blog</h1>
-        </header>
-        
-        <main>
-          <Routes>
-            {/* Core Feed Route */}
-            <Route
-              path="/"
-              element={
-                <div>
-                  {Array.isArray(posts) && posts.map(post => (
-                    <PostCard
-                      key={post.id}
-                      post={post}
-                      user={user}
-                      onUpdated={handleUpdated}
-                      onDeleted={handleDeleted}
+      {/* 🛡️ Global App Error Guard Added safely at the root layout boundary */}
+      <ErrorBoundary> 
+        <div className="App">
+          <header className="header">
+            <h1>Koikoi Blog</h1>
+          </header>
+          
+          <main>
+            <Routes>
+              {/* Core Feed Route */}
+              <Route
+                path="/"
+                element={
+                  <div>
+                    {Array.isArray(posts) && posts.map(post => (
+                      <PostCard
+                        key={post.id}
+                        post={post}
+                        user={user}
+                        onUpdated={handleUpdated}
+                        onDeleted={handleDeleted}
                       />
-                  ))}
-                </div>
-              }
-            />
+                    ))}
+                  </div>
+                }
+              />
 
-            {/* Application Feature Routes */}
-            <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
-            <Route path="/notifications" element={<Notifications user={user} />} />
-            <Route path="/settings" element={<Settings user={user} />} />
-            
-            {/* High-Efficiency Search matching structural prop criteria */}
-            <Route 
-              path="/search" 
-              element={
-                <Search 
-                  user={user} 
-                  onUpdated={handleUpdated} 
-                  onDeleted={handleDeleted} 
-                />
-              } 
-            />
-            
-            {/* Editor Content Pipelines (Protected Route Enforced below) */}
-            <Route 
-              path="/new" 
-              element={
-                user ? (
-                  <QuillEditor user={user} onSaved={handleSaved} />
-                ) : (
-                  <Navigate to="/signin" replace />
-                )
-              } 
-            />
-            <Route path="/edit/:id" element={<EditWrapper user={user} onSaved={handleSaved} />} />
+              {/* Application Feature Routes */}
+              <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
+              <Route path="/notifications" element={<Notifications user={user} />} />
+              <Route path="/settings" element={<Settings user={user} />} />
+              
+              {/* High-Efficiency Search matching structural prop criteria */}
+              <Route 
+                path="/search" 
+                element={
+                  <Search 
+                    user={user} 
+                    onUpdated={handleUpdated} 
+                    onDeleted={handleDeleted} 
+                  />
+                } 
+              />
+              
+              {/* Editor Content Pipelines (Protected Route Enforced below) */}
+              <Route 
+                path="/new" 
+                element={
+                  user ? (
+                    <QuillEditor user={user} onSaved={handleSaved} />
+                  ) : (
+                    <Navigate to="/signin" replace />
+                  )
+                } 
+              />
+              <Route path="/edit/:id" element={<EditWrapper user={user} onSaved={handleSaved} />} />
 
-            {/* Authentication Nodes — Aligned to look for custom handler hooks */}
-            <Route path="/signin" element={<Signin onSignedIn={setUser} />} />
-            <Route path="/signup" element={<Signup onSignedUp={setUser} />} />
+              {/* Authentication Nodes — Aligned to look for custom handler hooks */}
+              <Route path="/signin" element={<Signin onSignedIn={setUser} />} />
+              <Route path="/signup" element={<Signup onSignedUp={setUser} />} />
 
-            {/* Static Legal Disclosures & App Context Pages */}
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-          </Routes>
-        </main>
-        
-        {/* Navigational Anchors */}
-        <BottomNav user={user} />
-        <Footer />
-        
-        {/* Global Modal/Banner Overlays */}
-        <CookieConsent /> 
-      </div>
+              {/* Static Legal Disclosures & App Context Pages */}
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+            </Routes>
+          </main>
+          
+          {/* Navigational Anchors */}
+          <BottomNav user={user} />
+          <Footer />
+          
+          {/* Global Modal/Banner Overlays */}
+          <CookieConsent /> 
+        </div>
+      </ErrorBoundary>
     </Router>
   );
 }
