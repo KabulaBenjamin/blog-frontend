@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function PostCard({ post, user, onUpdated, onDeleted }) {
   const navigate = useNavigate();
+  const [commentText, setCommentText] = useState('');
+  const [showCommentBox, setShowCommentBox] = useState(false);
+
+  // 🛡️ Loose comparison string casting fixes integer-vs-string PostgreSQL id validation drops
+  const isOwner = user && String(user.id) === String(post.user_id);
 
   const handleLike = async () => {
     try {
@@ -14,22 +19,36 @@ function PostCard({ post, user, onUpdated, onDeleted }) {
     }
   };
 
-  const handleComment = async () => {
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+
     try {
-      const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}/comment`, { method: 'POST' });
+      const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}/comment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: commentText, username: user?.username || 'Anonymous' })
+      });
       const updated = await res.json();
       onUpdated(updated);
+      setCommentText('');
+      setShowCommentBox(false);
     } catch (err) {
       console.error('Comment failed:', err);
     }
   };
 
   const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
     try {
       const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}`, { method: 'DELETE' });
-      const result = await res.json();
-      if (result.success) {
+      
+      // If server returns 200/204 status cleanly, delete from local state array
+      if (res.ok) {
         onDeleted(post.id);
+      } else {
+        const result = await res.json();
+        if (result.success) onDeleted(post.id);
       }
     } catch (err) {
       console.error('Delete failed:', err);
@@ -37,14 +56,19 @@ function PostCard({ post, user, onUpdated, onDeleted }) {
   };
 
   const handleShare = () => {
+    // Generates an explicit direct path link target for the post dynamic route
+    const postUrl = `${window.location.origin}/edit/${post.id}`;
+    
     if (navigator.share) {
       navigator.share({
         title: post.title,
-        text: post.content.replace(/<[^>]+>/g, '').slice(0, 100) + '...',
-        url: window.location.href
-      });
+        text: post.content ? post.content.replace(/<[^>]+>/g, '').slice(0, 100) + '...' : '',
+        url: postUrl
+      }).catch(err => console.log('Share canceled:', err));
     } else {
-      alert('Sharing not supported in this browser.');
+      navigator.clipboard.writeText(postUrl)
+        .then(() => alert('Post link copied to clipboard!'))
+        .catch(() => alert('Sharing is not supported on this browser context.'));
     }
   };
 
@@ -57,20 +81,34 @@ function PostCard({ post, user, onUpdated, onDeleted }) {
           <a href={post.live_link} target="_blank" rel="noopener noreferrer">Live Link</a>
         </p>
       )}
-      <p><strong>By:</strong> {post.username}</p>
-      <p>👍 {post.likes || 0} | 💬 {post.comments || 0}</p>
+      <p><strong>By:</strong> {post.username || 'Unknown'}</p>
+      <p>👍 {post.likes || 0} | 💬 {Array.isArray(post.comments) ? post.comments.length : (post.comments || 0)}</p>
 
       <div className="actions">
         <button onClick={handleLike}>Like</button>
-        <button onClick={handleComment}>Comment</button>
+        <button onClick={() => setShowCommentBox(!showCommentBox)}>Comment</button>
         <button onClick={handleShare}>Share</button>
-        {user && (user.id === post.user_id) && (
+        {isOwner && (
           <>
             <button onClick={() => navigate(`/edit/${post.id}`)}>Edit</button>
             <button onClick={handleDelete}>Delete</button>
           </>
         )}
       </div>
+
+      {showCommentBox && (
+        <form onSubmit={handleCommentSubmit} style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
+          <input 
+            type="text" 
+            placeholder={user ? "Write a comment..." : "Log in to leave a comment..."}
+            value={commentText} 
+            onChange={(e) => setCommentText(e.target.value)}
+            disabled={!user}
+            style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid #ddd' }}
+          />
+          <button type="submit" disabled={!user} style={{ padding: '8px 12px', cursor: 'pointer' }}>Post</button>
+        </form>
+      )}
     </div>
   );
 }
