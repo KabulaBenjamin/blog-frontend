@@ -11,18 +11,20 @@ function Signup({ onSignedUp }) {
       const res = await fetch('https://blog-2y55.onrender.com/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        credentials: 'include' // 🛡️ CRITICAL: Authorizes receipt of token signature handshakes
       });
+      
       const data = await res.json();
-      if (data.id) {
-        localStorage.setItem('user', JSON.stringify(data));
-        onSignedUp(data);
+      if (data.success && data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        onSignedUp(data.user);
         window.location.href = '/';
       } else {
         alert(data.error || 'Signup failed');
       }
     } catch (err) {
-      console.error('Signup error:', err);
+      console.error('Signup system infrastructure error:', err);
       alert('Server error, please try again.');
     }
   };
@@ -50,7 +52,6 @@ function Signup({ onSignedUp }) {
         <button type="submit" style={{ width: '100%', padding: '0.5rem', cursor: 'pointer' }}>Sign Up</button>
       </form>
 
-      {/* Alternative Login Action Route Link */}
       <div className="auth-redirect" style={{ marginTop: '1.5rem', textAlign: 'center', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
         <p style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666' }}>Already have an account?</p>
         <Link to="/signin">

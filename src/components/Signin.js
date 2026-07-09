@@ -11,8 +11,10 @@ function Signin({ onSignedIn }) {
       const res = await fetch('https://blog-2y55.onrender.com/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        credentials: 'include' // 🛡️ CRITICAL: Grants browser permission to save httpOnly token cookies
       });
+      
       const data = await res.json();
       if (data.success) {
         localStorage.setItem('user', JSON.stringify(data.user));
@@ -50,7 +52,6 @@ function Signin({ onSignedIn }) {
         <button type="submit" style={{ width: '100%', padding: '0.5rem', cursor: 'pointer' }}>Sign In</button>
       </form>
 
-      {/* Account Creation Onboarding Trigger */}
       <div className="auth-redirect" style={{ marginTop: '1.5rem', textAlign: 'center', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
         <p style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666' }}>Don't have an account yet?</p>
         <Link to="/signup">
