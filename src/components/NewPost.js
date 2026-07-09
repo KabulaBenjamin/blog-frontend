@@ -1,45 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+
+// ⚡ Browser-native ultra-fast image compression engine
+const compressImage = (file) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200; // Optimal resolution threshold for modern displays
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert canvas image to an optimized binary JPEG Blob block at 75% quality
+        canvas.toBlob((blob) => {
+          const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+            type: 'image/jpeg',
+            lastModified: Date.now(),
+          });
+          resolve(compressedFile);
+        }, 'image/jpeg', 0.75);
+      };
+    };
+  });
+};
 
 function NewPost({ user, onCreated, existingPost }) {
   const [title, setTitle] = useState(existingPost ? existingPost.title : '');
   const [content, setContent] = useState(existingPost ? existingPost.content : '');
+  
+  // Ref hook to cleanly communicate with the editor API across cycles
+  const quillRef = useRef(null);
 
-  const imageHandler = function() {
-    const input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
-    input.click();
-    input.onchange = async () => {
-      const file = input.files[0];
-      const formData = new FormData();
-      formData.append('media', file);
-      formData.append('user_id', user.id);
-      formData.append('title', title || 'temp');
-      formData.append('content', content || 'temp');
-      formData.append('editor_type', 'quill');
-
-      try {
-        const res = await fetch('https://blog-2y55.onrender.com/posts', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-        if (data.media_url) {
-          const quill = this.quill;
-          const range = quill.getSelection();
-          quill.insertEmbed(range.index, 'image', data.media_url);
-        } else {
-          alert('Image upload failed.');
-        }
-      } catch (err) {
-        console.error('Image upload error:', err);
-      }
-    };
-  };
-
-  const modules = {
+  // 🛡️ useMemo guarantees modules are locked down, preventing cursor focus drop while typing
+  const modules = useMemo(() => ({
     toolbar: {
       container: [
         [{ 'header': [1, 2, false] }],
@@ -48,9 +56,54 @@ function NewPost({ user, onCreated, existingPost }) {
         [{ 'list': 'ordered'}, { 'list': 'bullet' }],
         ['clean']
       ],
-      handlers: { image: imageHandler }
+      handlers: {
+        image: function () {
+          const input = document.createElement('input');
+          input.setAttribute('type', 'file');
+          input.setAttribute('accept', 'image/*');
+          input.click();
+          
+          input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) return;
+
+            try {
+              // 1. Compress the file in client-side memory
+              const optimizedFile = await compressImage(file);
+
+              const formData = new FormData();
+              formData.append('media', optimizedFile); // Matches upload.single('media') on backend
+
+              // 2. Direct clean upload isolation route (avoids duplicate phantom posts)
+              const res = await fetch('https://blog-2y55.onrender.com/upload-image', {
+                method: 'POST',
+                body: formData
+              });
+              
+              if (res.ok) {
+                const data = await res.json();
+                
+                // Safe lookup using the instance wrapper ref
+                const quill = quillRef.current.getEditor();
+                const range = quill.getSelection(true); 
+                
+                const completeImageUrl = data.url.startsWith('http') 
+                  ? data.url 
+                  : `https://blog-2y55.onrender.com${data.url}`;
+
+                quill.insertEmbed(range.index, 'image', completeImageUrl);
+                quill.setSelection(range.index + 1); 
+              } else {
+                alert('Image upload failed.');
+              }
+            } catch (err) {
+              console.error('Image upload error segment:', err);
+            }
+          };
+        }
+      }
     }
-  };
+  }), []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,14 +130,14 @@ function NewPost({ user, onCreated, existingPost }) {
       if (data.error) {
         alert(data.error);
       } else {
-        onCreated(data);
+        if (onCreated) onCreated(data);
         setTitle('');
         setContent('');
         window.location.href = '/';
       }
     } catch (err) {
-      console.error('Post error:', err);
-      alert('Server error, please try again.');
+      console.error('Post processing framework error:', err);
+      alert('Server encountered an issue. Please attempt publishing again.');
     }
   };
 
@@ -100,15 +153,16 @@ function NewPost({ user, onCreated, existingPost }) {
           required
         />
         <ReactQuill
+          ref={quillRef}
           theme="snow"
           value={content}
           onChange={setContent}
           modules={modules}
           placeholder="Write your content here..."
         />
-        <div className="post-actions">
+        <div className="post-actions" style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
           <button type="submit">{existingPost ? 'Update' : 'Publish'}</button>
-          <button type="button" onClick={() => window.location.href = '/'}>Cancel</button>
+          <button type="button" onClick={() => window.location.href = '/'} style={{ background: '#6c757d' }}>Cancel</button>
         </div>
       </form>
     </div>
