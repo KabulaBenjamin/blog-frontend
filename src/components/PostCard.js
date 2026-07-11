@@ -11,7 +11,10 @@ function PostCard({ post, user, onUpdated, onDeleted }) {
 
   const handleLike = async () => {
     try {
-      const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}/like`, { method: 'POST' });
+      const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}/like`, { 
+        method: 'POST',
+        credentials: 'include' // 👈 Fixed: Passes auth cookie
+      });
       const updated = await res.json();
       onUpdated(updated);
     } catch (err) {
@@ -27,7 +30,8 @@ function PostCard({ post, user, onUpdated, onDeleted }) {
       const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}/comment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: commentText, username: user?.username || 'Anonymous' })
+        body: JSON.stringify({ text: commentText, username: user?.username || 'Anonymous' }),
+        credentials: 'include' // 👈 Fixed: Passes auth cookie
       });
       const updated = await res.json();
       onUpdated(updated);
@@ -41,7 +45,10 @@ function PostCard({ post, user, onUpdated, onDeleted }) {
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
     try {
-      const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}`, { method: 'DELETE' });
+      const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}`, { 
+        method: 'DELETE',
+        credentials: 'include' // 👈 Fixed: Passes auth cookie
+      });
       
       // If server returns 200/204 status cleanly, delete from local state array
       if (res.ok) {
