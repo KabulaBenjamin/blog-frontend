@@ -76,6 +76,13 @@ function App() {
     });
   };
 
+  // Explicit helper to handle custom logging out wipes cleanly
+  const handleLogoutSuccess = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    window.location.href = '/';
+  };
+
   useEffect(() => {
     // 1. Initial HTTP Fetch for Core Posts Feed
     fetch('https://blog-2y55.onrender.com/posts')
@@ -183,7 +190,18 @@ function App() {
               {/* Application Feature Routes */}
               <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
               <Route path="/notifications" element={<Notifications user={user} />} />
-              <Route path="/settings" element={<Settings user={user} />} />
+              
+              {/* 🛠️ UPDATED: Added target hooks to handle Identity Updates and State synchronization */}
+              <Route 
+                path="/settings" 
+                element={
+                  <Settings 
+                    user={user} 
+                    onLogoutSuccess={handleLogoutSuccess} 
+                    onSignedIn={setUser} 
+                  />
+                } 
+              />
               
               {/* High-Efficiency Search matching structural prop criteria */}
               <Route 
