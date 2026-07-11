@@ -8,6 +8,9 @@ function Settings({ user, onLogoutSuccess }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  // Define centralized backend API URL target
+  const BACKEND_URL = 'https://blog-2y55.onrender.com';
+
   useEffect(() => {
     if (darkMode) {
       document.body.classList.add('dark-theme');
@@ -22,7 +25,7 @@ function Settings({ user, onLogoutSuccess }) {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      const response = await fetch(`${window.location.origin}/logout`, {
+      const response = await fetch(`${BACKEND_URL}/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +62,7 @@ function Settings({ user, onLogoutSuccess }) {
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`${window.location.origin}/delete-account`, {
+      const response = await fetch(`${BACKEND_URL}/delete-account`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -120,7 +123,7 @@ function Settings({ user, onLogoutSuccess }) {
                 Change Password
               </button>
               
-              {/* NEW: Log Out Button */}
+              {/* Log Out Button */}
               <button 
                 onClick={handleLogout}
                 disabled={isDeleting || isLoggingOut}
@@ -135,6 +138,7 @@ function Settings({ user, onLogoutSuccess }) {
                 {isLoggingOut ? 'Logging out...' : 'Log Out'}
               </button>
 
+              {/* Delete Account Button */}
               <button 
                 onClick={handleDeleteAccount}
                 disabled={isDeleting || isLoggingOut}
