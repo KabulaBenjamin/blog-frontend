@@ -1,106 +1,104 @@
 import React, { useEffect, useState } from 'react';
 import PostCard from './PostCard';
 
-function Profile({ user }) {
+function Profile({ user, setActiveTab }) {
   const [posts, setPosts] = useState([]);
   const [stats, setStats] = useState({ total_likes: 0, total_comments: 0, total_posts: 0 });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
 
-    // Fetch user's posts
-    fetch(`https://blog-2y55.onrender.com/users/${user.id}/posts`)
-      .then(res => res.json())
-      .then(data => setPosts(data))
-      .catch(err => console.error('Failed to fetch user posts:', err));
+    setIsLoading(true);
 
-    // Fetch user's stats
-    fetch(`https://blog-2y55.onrender.com/users/${user.id}/stats`)
-      .then(res => res.json())
+    // Fetch user's posts securely
+    fetch(`https://blog-2y55.onrender.com/users/${user.id}/posts`, {
+      credentials: 'include'
+    })
+      .then(res => {
+        if (!res.ok) {
+          // If 404 or empty account record, return fallback array instead of crashing
+          return [];
+        }
+        return res.json();
+      })
+      .then(data => setPosts(Array.isArray(data) ? data : []))
+      .catch(err => {
+        console.warn('Handling empty post profile fallback:', err);
+        setPosts([]);
+      });
+
+    // Fetch user's stats securely
+    fetch(`https://blog-2y55.onrender.com/users/${user.id}/stats`, {
+      credentials: 'include'
+    })
+      .then(res => {
+        if (!res.ok) {
+          // Default data profile if backend route doesn't exist yet
+          return { total_likes: 0, total_comments: 0, total_posts: 0 };
+        }
+        return res.json();
+      })
       .then(data => setStats(data))
-      .catch(err => console.error('Failed to fetch user stats:', err));
+      .catch(err => {
+        console.warn('Handling empty stats profile fallback:', err);
+        setStats({ total_likes: 0, total_comments: 0, total_posts: 0 });
+      })
+      .finally(() => setIsLoading(false));
   }, [user]);
 
-  const handleLogout = async () => {
-    if (!window.confirm('Are you sure you want to log out?')) return;
-    try {
-      const res = await fetch('https://blog-2y55.onrender.com/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
+  // Fallback state if no user session is detected
+  if (!user) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <p style={{ color: '#666', marginBottom: '10px' }}>Please log in to view your profile dashboard.</p>
+        <button 
+          onClick={() => {
+            if (typeof setActiveTab === 'function') {
+              setActiveTab('signin');
+            } else {
+              window.location.href = '/login';
+            }
+          }}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#007bff',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Go to Sign In Page
+        </button>
+      </div>
+    );
+  }
 
-      if (res.ok) {
-        localStorage.removeItem('user');
-        window.location.href = '/';
-      } else {
-        alert('Logout parsing failed.');
-      }
-    } catch (err) {
-      console.error('Logout error:', err);
-      alert('Error communicating with logout engine.');
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    const firstConfirm = window.confirm('⚠️ WARNING: Are you absolutely sure you want to delete your account? This will permanently erase your profile and all your posts.');
-    if (!firstConfirm) return;
-
-    const secondConfirm = window.confirm('🔴 FINAL WARNING: This action CANNOT be undone. Proceed with permanent deletion?');
-    if (!secondConfirm) return;
-
-    try {
-      const res = await fetch('https://blog-2y55.onrender.com/delete-account', {
-        method: 'DELETE',
-        credentials: 'include' // 🛡️ Necessary to pass validation cookie details to backend context
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        alert('Your account has been permanently removed.');
-        localStorage.removeItem('user');
-        window.location.href = '/'; // Redirect home as guest
-      } else {
-        alert(data.error || 'Failed to delete account.');
-      }
-    } catch (err) {
-      console.error('Account deletion error:', err);
-      alert('Error communicating with the server.');
-    }
-  };
-
-  if (!user) return <p style={{ padding: '1rem', textAlign: 'center' }}>Please log in to view your profile.</p>;
+  if (isLoading) {
+    return <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>Loading metrics...</div>;
+  }
 
   return (
     <div className="profile" style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h2>{user.username}'s Profile</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            onClick={handleLogout} 
-            style={{ background: '#666', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}
-          >
-            Log Out
-          </button>
-          <button 
-            onClick={handleDeleteAccount} 
-            style={{ background: '#ff0000', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            Delete Account
-          </button>
-        </div>
       </div>
 
-      <div className="stats" style={{ background: '#f5f5f5', padding: '1rem', borderRadius: '6px', margin: '1rem 0' }}>
-        <p>Total Posts: {stats.total_posts}</p>
-        <p>Total Likes: {stats.total_likes}</p>
-        <p>Total Comments: {stats.total_comments}</p>
+      {/* Analytics Dashboard Matrix */}
+      <div className="stats" style={{ background: '#f5f5f5', padding: '1rem', borderRadius: '6px', margin: '1rem 0', color: '#333' }}>
+        <p>Total Posts: <strong>{stats.total_posts || 0}</strong></p>
+        <p>Total Likes: <strong>{stats.total_likes || 0}</strong></p>
+        <p>Total Comments: <strong>{stats.total_comments || 0}</strong></p>
       </div>
 
       <div className="user-posts">
         <h3>Your Published Content</h3>
         {posts.length === 0 ? (
-          <p>No posts yet.</p>
+          <p style={{ color: '#888' }}>No posts published yet. Go ahead and write your first blog post!</p>
         ) : (
           posts.map(post => (
             <PostCard
