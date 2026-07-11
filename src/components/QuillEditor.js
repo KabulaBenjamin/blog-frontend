@@ -6,11 +6,10 @@ import 'react-quill/dist/quill.snow.css';
 // 1. REGISTER CUSTOM FONTS INTO QUILL REGISTRY
 // ==========================================
 const Font = Quill.import('formats/font');
-// The array names must match the exact CSS classes we define below
 Font.whitelist = ['serif', 'monospace', 'sans-serif', 'times-new-roman', 'arial', 'georgia'];
 Quill.register(Font, true);
 
-// ⚡ Browser-native image compression engine
+// ⚡ Browser-native ultra-fast image compression engine
 const compressImage = (file) => {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -20,7 +19,7 @@ const compressImage = (file) => {
       img.src = event.target.result;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1200;
+        const MAX_WIDTH = 1200; // Optimal resolution threshold for web/mobile displays
         let width = img.width;
         let height = img.height;
 
@@ -34,13 +33,14 @@ const compressImage = (file) => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
+        // Convert canvas image to an optimized binary Blob block
         canvas.toBlob((blob) => {
           const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
             type: 'image/jpeg',
             lastModified: Date.now(),
           });
           resolve(compressedFile);
-        }, 'image/jpeg', 0.75);
+        }, 'image/jpeg', 0.75); // 75% compression preserves perfect visual balance
       };
     };
   });
@@ -67,7 +67,7 @@ function QuillEditor({ post, user, onSaved }) {
     quill.clipboard.dangerouslyPasteHTML(range.index, rawHtml);
   };
 
-  // Memoized modules configuration including custom fonts
+  // Memoized modules configuration to prevent focus drops during active key input states
   const modules = useMemo(() => ({
     toolbar: {
       container: [
@@ -90,10 +90,13 @@ function QuillEditor({ post, user, onSaved }) {
             if (!file) return;
 
             try {
+              // 1. Compress the raw user file in client-side memory
               const optimizedFile = await compressImage(file);
-              const formData = new FormData();
-              formData.append('media', optimizedFile);
 
+              const formData = new FormData();
+              formData.append('media', optimizedFile); // Matches upload.single('media') on backend
+
+              // 2. Transmit the highly compressed, lightweight media file
               const res = await fetch('https://blog-2y55.onrender.com/upload-image', {
                 method: 'POST',
                 body: formData
@@ -104,6 +107,7 @@ function QuillEditor({ post, user, onSaved }) {
                 const quill = quillRef.current.getEditor();
                 const range = quill.getSelection(true); 
                 
+                // If backend returns a fully validated URL string directly, fallback checks clean it up
                 const completeImageUrl = data.url.startsWith('http') 
                   ? data.url 
                   : `https://blog-2y55.onrender.com${data.url}`;
@@ -197,8 +201,8 @@ function QuillEditor({ post, user, onSaved }) {
         onChange={e => setTitle(e.target.value)}
       />
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="button" class="html-paste-btn" onClick={pasteRawHtmlDirectly}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
+        <button type="button" className="html-paste-btn" onClick={pasteRawHtmlDirectly}>
           📋 Paste Raw HTML Snippet
         </button>
       </div>
