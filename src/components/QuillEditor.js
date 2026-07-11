@@ -1,8 +1,16 @@
 import React, { useState, useMemo, useRef } from 'react';
-import ReactQuill from 'react-quill';
+import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
-// ⚡ Browser-native ultra-fast image compression engine
+// ==========================================
+// 1. REGISTER CUSTOM FONTS INTO QUILL REGISTRY
+// ==========================================
+const Font = Quill.import('formats/font');
+// The array names must match the exact CSS classes we define below
+Font.whitelist = ['serif', 'monospace', 'sans-serif', 'times-new-roman', 'arial', 'georgia'];
+Quill.register(Font, true);
+
+// ⚡ Browser-native image compression engine
 const compressImage = (file) => {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -12,7 +20,7 @@ const compressImage = (file) => {
       img.src = event.target.result;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1200; // Optimal resolution threshold for web/mobile displays
+        const MAX_WIDTH = 1200;
         let width = img.width;
         let height = img.height;
 
@@ -26,14 +34,13 @@ const compressImage = (file) => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert canvas image to an optimized binary Blob block
         canvas.toBlob((blob) => {
           const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
             type: 'image/jpeg',
             lastModified: Date.now(),
           });
           resolve(compressedFile);
-        }, 'image/jpeg', 0.75); // 75% compression preserves perfect visual balance
+        }, 'image/jpeg', 0.75);
       };
     };
   });
@@ -46,10 +53,25 @@ function QuillEditor({ post, user, onSaved }) {
 
   const quillRef = useRef(null);
 
-  // Memoized modules configuration to prevent focus drops during active key input states
+  // ==========================================
+  // 2. RAW HTML PASTE HYDRATION HANDLER
+  // ==========================================
+  const pasteRawHtmlDirectly = () => {
+    const rawHtml = prompt("Paste your raw HTML data here:");
+    if (!rawHtml) return;
+
+    const quill = quillRef.current.getEditor();
+    const range = quill.getSelection(true);
+
+    // Using dangerouslyPasteHTML accurately parses strings into Deltas dynamically
+    quill.clipboard.dangerouslyPasteHTML(range.index, rawHtml);
+  };
+
+  // Memoized modules configuration including custom fonts
   const modules = useMemo(() => ({
     toolbar: {
       container: [
+        [{ 'font': ['serif', 'monospace', 'sans-serif', 'times-new-roman', 'arial', 'georgia'] }],
         [{ 'header': [1, 2, false] }],
         ['bold', 'italic', 'underline'],
         ['link', 'image'],
@@ -68,13 +90,10 @@ function QuillEditor({ post, user, onSaved }) {
             if (!file) return;
 
             try {
-              // 1. Compress the raw user file in client-side memory
               const optimizedFile = await compressImage(file);
-
               const formData = new FormData();
-              formData.append('media', optimizedFile); // Matches upload.single('media') on backend
+              formData.append('media', optimizedFile);
 
-              // 2. Transmit the highly compressed, lightweight media file
               const res = await fetch('https://blog-2y55.onrender.com/upload-image', {
                 method: 'POST',
                 body: formData
@@ -85,7 +104,6 @@ function QuillEditor({ post, user, onSaved }) {
                 const quill = quillRef.current.getEditor();
                 const range = quill.getSelection(true); 
                 
-                // If backend returns a fully validated URL string directly, fallback checks clean it up
                 const completeImageUrl = data.url.startsWith('http') 
                   ? data.url 
                   : `https://blog-2y55.onrender.com${data.url}`;
@@ -142,12 +160,49 @@ function QuillEditor({ post, user, onSaved }) {
 
   return (
     <div className="quill-editor">
+      {/* Dynamic CSS Styling Injector for Font Mappings */}
+      <style>{`
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="times-new-roman"]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="times-new-roman"]::before {
+          content: 'Times New Roman';
+          font-family: 'Times New Roman', Times, serif;
+        }
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="arial"]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="arial"]::before {
+          content: 'Arial';
+          font-family: Arial, sans-serif;
+        }
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="georgia"]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="georgia"]::before {
+          content: 'Georgia';
+          font-family: Georgia, serif;
+        }
+
+        /* Set the actual inline runtime fonts inside the text area container */
+        .ql-font-times-new-roman { font-family: 'Times New Roman', Times, serif; }
+        .ql-font-arial { font-family: Arial, sans-serif; }
+        .ql-font-georgia { font-family: Georgia, serif; }
+
+        .html-paste-btn {
+          background: #333; color: #fff; border: none; padding: 6px 12px;
+          margin-bottom: 8px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
+        }
+        .html-paste-btn:hover { background: #555; }
+      `}</style>
+
       <input
         type="text"
         placeholder="Post title"
         value={title}
         onChange={e => setTitle(e.target.value)}
       />
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button type="button" class="html-paste-btn" onClick={pasteRawHtmlDirectly}>
+          📋 Paste Raw HTML Snippet
+        </button>
+      </div>
+
       <ReactQuill
         ref={quillRef} 
         theme="snow"
@@ -156,6 +211,7 @@ function QuillEditor({ post, user, onSaved }) {
         modules={modules}
         placeholder="Write your content here..."
       />
+
       <input
         type="text"
         placeholder="Live link"
