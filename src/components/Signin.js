@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 function Signin({ onSignedIn }) {
-  const [view, setView] = useState('signin'); // Context modes: 'signin' | 'forgot' | 'reset'
+  const [view, setView] = useState('signin'); // Modes: 'signin' | 'forgot' | 'reset'
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
+  
+  // Custom tracking state to hold the server token inside the UI layer safely
+  const [uiGeneratedToken, setUiGeneratedToken] = useState('');
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
@@ -28,7 +31,7 @@ function Signin({ onSignedIn }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
-        credentials: 'include' // 🛡️ CRITICAL: Standard session token allowance
+        credentials: 'include' // 🛡️ CRITICAL: Standard session cookie retention
       });
       
       const data = await res.json();
@@ -44,7 +47,8 @@ function Signin({ onSignedIn }) {
           window.location.href = '/';
         }
       } else if (view === 'forgot') {
-        alert(`Token generated: ${data.token}\n\nCopy this token to complete validation step.`);
+        // Cache the token to render safely inside the form framework banner
+        setUiGeneratedToken(data.token);
         setView('reset');
         setPassword(''); // clear to repurpose input for new password
       } else if (view === 'reset') {
@@ -52,6 +56,7 @@ function Signin({ onSignedIn }) {
         setView('signin');
         setPassword('');
         setToken('');
+        setUiGeneratedToken('');
       }
     } catch (err) {
       console.error('Authentication Error:', err);
@@ -68,6 +73,23 @@ function Signin({ onSignedIn }) {
       </h2>
 
       <form onSubmit={handleAuthSubmit}>
+        {/* Token Alert Banner Panel (Shows up on the Reset screen to provide copy-paste assurance) */}
+        {view === 'reset' && uiGeneratedToken && (
+          <div style={{ 
+            background: '#fff3cd', 
+            padding: '12px', 
+            borderRadius: '4px', 
+            marginBottom: '1rem', 
+            border: '1px solid #ffeeba',
+            color: '#856404',
+            textAlign: 'center'
+          }}>
+            <p style={{ margin: '0 0 4px 0', fontSize: '0.9rem' }}>🔑 <strong>Temporary Reset Token:</strong></p>
+            <h3 style={{ margin: '0 0 4px 0', letterSpacing: '2px', fontSize: '1.4rem' }}>{uiGeneratedToken}</h3>
+            <small style={{ fontSize: '0.8rem' }}>Copy this validation key code and paste it below.</small>
+          </div>
+        )}
+
         {/* Username Row Context */}
         {(view === 'signin' || view === 'forgot') && (
           <input
@@ -76,7 +98,7 @@ function Signin({ onSignedIn }) {
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
-            style={{ display: 'block', width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
+            style={{ display: 'block', width: '100%', marginBottom: '1rem', padding: '0.5rem', boxSizing: 'border-box' }}
           />
         )}
 
@@ -88,7 +110,7 @@ function Signin({ onSignedIn }) {
             value={token}
             onChange={e => setToken(e.target.value)}
             required
-            style={{ display: 'block', width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
+            style={{ display: 'block', width: '100%', marginBottom: '1rem', padding: '0.5rem', boxSizing: 'border-box' }}
           />
         )}
 
@@ -100,7 +122,7 @@ function Signin({ onSignedIn }) {
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
-            style={{ display: 'block', width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
+            style={{ display: 'block', width: '100%', marginBottom: '1rem', padding: '0.5rem', boxSizing: 'border-box' }}
           />
         )}
 
@@ -118,7 +140,7 @@ function Signin({ onSignedIn }) {
             Forgot Password?
           </span>
         ) : (
-          <span style={{ color: '#666', cursor: 'pointer' }} onClick={() => { setView('signin'); setPassword(''); }}>
+          <span style={{ color: '#666', cursor: 'pointer' }} onClick={() => { setView('signin'); setPassword(''); setUiGeneratedToken(''); }}>
             ← Back to Sign In
           </span>
         )}
