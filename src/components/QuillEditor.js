@@ -98,8 +98,8 @@ function QuillEditor({ post, user, onSaved }) {
               formData.append('file', optimizedFile);
               formData.append('upload_preset', 'ml_default'); 
 
-              // 3. Transmit directly to Cloudinary pipeline bypassing backend storage bottlenecks
-              const res = await fetch('https://api.cloudinary.com/v1_1/benjamin-kabula/image/upload', {
+              // 3. Transmit directly to Cloudinary pipeline using your verified Cloud Name
+              const res = await fetch('https://api.cloudinary.com/v1_1/sy3yp1q8/image/upload', {
                 method: 'POST',
                 body: formData
               });
