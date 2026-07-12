@@ -136,11 +136,13 @@ function QuillEditor({ post, user, onSaved }) {
     }
 
     try {
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('content', content || '');
-      formData.append('editor_type', 'quill');
-      if (liveLink) formData.append('live_link', liveLink);
+      // 🛠️ Construct clean JSON payload data object instead of multi-part FormData
+      const postData = {
+        title: title,
+        content: content || '',
+        editor_type: 'quill',
+        live_link: liveLink || ''
+      };
 
       let url = 'https://blog-2y55.onrender.com/posts';
       let method = 'POST';
@@ -149,19 +151,26 @@ function QuillEditor({ post, user, onSaved }) {
         url = `https://blog-2y55.onrender.com/posts/${post.id}`;
         method = 'PUT';
       } else {
-        formData.append('user_id', user.id);
+        postData.user_id = user.id;
       }
 
-      // 🔑 UPDATED: Included credentials configuration parameter to preserve auth tokens across domain limits
+      // ⚡ Transmit payload with accurate serialization headers and cookies included
       const res = await fetch(url, { 
         method, 
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(postData),
         credentials: 'include' 
       });
       
       const saved = await res.json();
-      if (onSaved) onSaved(saved);
-      alert('Post saved successfully!');
+      if (res.ok) {
+        if (onSaved) onSaved(saved);
+        alert('Post saved successfully!');
+      } else {
+        alert(`Failed to save post: ${saved.message || 'Server encountered an issue saving your data.'}`);
+      }
     } catch (err) {
       console.error('Save pipeline exception recorded:', err);
     }
