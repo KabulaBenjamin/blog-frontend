@@ -98,7 +98,7 @@ function QuillEditor({ post, user, onSaved }) {
               formData.append('file', optimizedFile);
               formData.append('upload_preset', 'ml_default'); 
 
-              // 3. Transmit directly to Cloudinary using your lowercase API Cloud Name
+              // 3. Transmit directly to Cloudinary pipeline using your verified Cloud Name
               const res = await fetch('https://api.cloudinary.com/v1_1/sy3yp1q8/image/upload', {
                 method: 'POST',
                 body: formData
@@ -152,9 +152,11 @@ function QuillEditor({ post, user, onSaved }) {
         formData.append('user_id', user.id);
       }
 
+      // 🔑 UPDATED: Included credentials configuration parameter to preserve auth tokens across domain limits
       const res = await fetch(url, { 
         method, 
-        body: formData
+        body: formData,
+        credentials: 'include' 
       });
       
       const saved = await res.json();
