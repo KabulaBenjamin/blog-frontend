@@ -98,7 +98,7 @@ function QuillEditor({ post, user, onSaved }) {
               formData.append('file', optimizedFile);
               formData.append('upload_preset', 'ml_default'); 
 
-              // 3. Transmit directly to Cloudinary pipeline using your verified Cloud Name
+              // 3. Transmit directly to Cloudinary using your lowercase API Cloud Name
               const res = await fetch('https://api.cloudinary.com/v1_1/sy3yp1q8/image/upload', {
                 method: 'POST',
                 body: formData
@@ -117,7 +117,7 @@ function QuillEditor({ post, user, onSaved }) {
               } else {
                 const errData = await res.json();
                 console.error('Cloudinary API Response rejection:', errData);
-                alert('Image upload failed to process on Cloudinary.');
+                alert(`Cloudinary Error: ${errData.error?.message || 'Check upload preset settings'}`);
               }
             } catch (err) {
               console.error('Image upload optimization error chain:', err);
