@@ -93,11 +93,13 @@ function QuillEditor({ post, user, onSaved }) {
               // 1. Compress the raw user file in client-side memory
               const optimizedFile = await compressImage(file);
 
+              // 2. Construct multi-part body for direct Cloudinary ingestion
               const formData = new FormData();
-              formData.append('media', optimizedFile); // Matches upload.single('media') on backend
+              formData.append('file', optimizedFile);
+              formData.append('upload_preset', 'ml_default'); 
 
-              // 2. Transmit the highly compressed, lightweight media file
-              const res = await fetch('https://blog-2y55.onrender.com/upload-image', {
+              // 3. Transmit directly to Cloudinary pipeline bypassing backend storage bottlenecks
+              const res = await fetch('https://api.cloudinary.com/v1_1/benjamin-kabula/image/upload', {
                 method: 'POST',
                 body: formData
               });
@@ -107,18 +109,19 @@ function QuillEditor({ post, user, onSaved }) {
                 const quill = quillRef.current.getEditor();
                 const range = quill.getSelection(true); 
                 
-                // If backend returns a fully validated URL string directly, fallback checks clean it up
-                const completeImageUrl = data.url.startsWith('http') 
-                  ? data.url 
-                  : `https://blog-2y55.onrender.com${data.url}`;
+                // Extract clean, highly performant CDN link
+                const completeImageUrl = data.secure_url;
 
                 quill.insertEmbed(range.index, 'image', completeImageUrl);
                 quill.setSelection(range.index + 1); 
               } else {
-                alert('Image upload failed.');
+                const errData = await res.json();
+                console.error('Cloudinary API Response rejection:', errData);
+                alert('Image upload failed to process on Cloudinary.');
               }
             } catch (err) {
               console.error('Image upload optimization error chain:', err);
+              alert('Network error communicating with the asset optimization system.');
             }
           };
         }
