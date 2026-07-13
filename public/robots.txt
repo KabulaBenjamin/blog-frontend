@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://yourdomain.com/sitemap.xml
+# 🌐 Directly routes Googlebot to your live dynamic database stream
+Sitemap: https://blog-2y55.onrender.com/sitemap.xml
