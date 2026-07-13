@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './App.css';
-import PostCard from './components/PostCard';
 import BottomNav from './components/BottomNav';
 import Footer from './components/Footer';
 import Profile from './components/Profile';
@@ -21,6 +20,11 @@ import Contact from './components/Contact';
 import Terms from './components/Terms';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import Settings from './components/Settings';
+
+// New Feature Views
+import Home from './pages/Home';              // 🏠 New structured Home layout
+import Dashboard from './pages/Dashboard';    // 📊 New publisher analytics dashboard
+import PostDetail from './pages/PostDetail';  // 📝 Dedicated single post details page
 
 // Added Navigate here to protect client-side routes gracefully
 import { BrowserRouter as Router, Routes, Route, useParams, Navigate } from 'react-router-dom';
@@ -170,21 +174,21 @@ function App() {
           <main>
             <Routes>
               {/* Core Feed Route */}
-              <Route
-                path="/"
+              <Route path="/" element={<Home user={user} />} />
+
+              {/* 📝 Dedicated Single Post Details View Route */}
+              <Route path="/posts/:id" element={<PostDetail user={user} />} />
+
+              {/* 📊 Publisher Analytics Workstation Dashboard Route */}
+              <Route 
+                path="/dashboard" 
                 element={
-                  <div>
-                    {Array.isArray(posts) && posts.map(post => (
-                      <PostCard
-                        key={post.id}
-                        post={post}
-                        user={user}
-                        onUpdated={handleUpdated}
-                        onDeleted={handleDeleted}
-                      />
-                    ))}
-                  </div>
-                }
+                  user ? (
+                    <Dashboard user={user} />
+                  ) : (
+                    <Navigate to="/signin" replace />
+                  )
+                } 
               />
 
               {/* Application Feature Routes */}

@@ -4,13 +4,11 @@ import PostCard from './PostCard';
 function Home({ user }) {
   const [posts, setPosts] = useState([]);
 
-  // Always fetch posts fresh from backend
   const refreshPosts = async () => {
     try {
       const res = await fetch('https://blog-2y55.onrender.com/posts');
       const data = await res.json();
       setPosts(data);
-      localStorage.removeItem('posts');
     } catch (err) {
       console.error('Failed to fetch posts:', err);
     }
@@ -38,6 +36,7 @@ function Home({ user }) {
           user={user}
           onUpdated={handleUpdated}
           onDeleted={handleDeleted}
+          isFeedMode={true} /* 💡 Tell the card it's sitting inside the main feed list */
         />
       ))}
     </div>
