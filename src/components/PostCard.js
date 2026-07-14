@@ -6,6 +6,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const navigate = useNavigate();
   const [commentText, setCommentText] = useState('');
   const [showCommentBox, setShowCommentBox] = useState(false);
+  const [isLiking, setIsLiking] = useState(false); // Prevents rapid spam clicking
 
   const isOwner = user && String(user.id) === String(post.user_id);
 
@@ -19,7 +20,14 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
 
   const theme = categoryTheme[post.category] || categoryTheme.tech;
 
+  // Check if current user has already liked this post.
+  // Assumes your backend includes a `liked_by_users` array of user IDs on the post object.
+  const hasLiked = post.liked_by_users?.includes(user?.id);
+
   const handleLike = async () => {
+    if (isLiking || !user) return; // Prevent clicking if request is pending or user is anonymous
+    setIsLiking(true);
+
     try {
       const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}/like`, { 
         method: 'POST',
@@ -29,6 +37,8 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
       if (onUpdated) onUpdated(updated);
     } catch (err) {
       console.error('Like failed:', err);
+    } finally {
+      setIsLiking(false); // Re-enable the button once request completes
     }
   };
 
@@ -145,7 +155,21 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
           <button onClick={() => navigate(`/posts/${post.id}`)} style={{ background: '#007bff', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Read Full Post</button>
         ) : (
           <>
-            <button onClick={handleLike} style={{ background: '#f1f5f9', color: '#4a5568', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Like</button>
+            <button 
+              onClick={handleLike} 
+              disabled={isLiking || !user}
+              style={{ 
+                background: hasLiked ? '#e2e8f0' : '#f1f5f9', 
+                color: hasLiked ? '#1e293b' : '#4a5568', 
+                border: 'none', 
+                padding: '8px 16px', 
+                borderRadius: '4px', 
+                cursor: isLiking || !user ? 'not-allowed' : 'pointer', 
+                fontWeight: '600' 
+              }}
+            >
+              {isLiking ? 'Saving...' : hasLiked ? '❤️ Liked' : '👍 Like'}
+            </button>
             <button onClick={() => setShowCommentBox(!showCommentBox)} style={{ background: '#f1f5f9', color: '#4a5568', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Comment</button>
           </>
         )}
