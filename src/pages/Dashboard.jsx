@@ -3,60 +3,136 @@ import React, { useEffect, useState } from 'react';
 import AnalyticsChart from '../components/AnalyticsChart';
 
 export default function Dashboard() {
-  const [metrics, setMetrics] = useState({ summary: { totalViews: 0, totalPosts: 0 }, timeline: [], posts: [] });
+  const [metrics, setMetrics] = useState({ 
+    summary: { totalViews: 0, totalPosts: 0 }, 
+    timeline: [], 
+    posts: [] 
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Fetches aggregate data from your live backend
     fetch('https://blog-2y55.onrender.com/api/analytics/dashboard', {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } // fits fallback state models
+      headers: { 
+        'Authorization': `Bearer ${localStorage.getItem('token')}` // Matches your session storage pattern
+      } 
     })
       .then(res => res.json())
-      .then(data => { if (!data.error) setMetrics(data); })
+      .then(data => { 
+        if (!data.error) {
+          setMetrics(data);
+        } 
+      })
       .catch(err => console.error('Metrics fetch error:', err))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="container"><h3>Compiling data summary layers...</h3></div>;
+  if (loading) {
+    return (
+      <div className="container" style={{ padding: '40px 20px', textAlign: 'center' }}>
+        <h3>Compiling data summary layers...</h3>
+      </div>
+    );
+  }
 
   return (
-    <div className="container">
-      <h2 style={{ marginBottom: '20px' }}>Publisher Workstation Dashboard</h2>
+    <div className="container" style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
+      <h2 style={{ marginBottom: '20px', fontSize: '1.8rem', color: '#1a202c' }}>
+        Publisher Workstation Dashboard
+      </h2>
       
-      {/* Overview Analytics Row widgets cards metrics blocks */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-        <div style={{ background: 'white', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-          <span style={{ fontSize: '14px', color: '#718096', fontWeight: '500' }}>TOTAL VIEWS</span>
-          <h1 style={{ margin: '8px 0 0 0', color: '#007bff', fontSize: '2.5rem' }}>{metrics.summary.totalViews.toLocaleString()}</h1>
+      {/* Overview Stats Cards Grid */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+        gap: '16px', 
+        marginBottom: '20px' 
+      }}>
+        {/* Card 1: Total Unique Views */}
+        <div style={{ 
+          background: 'white', 
+          padding: '20px', 
+          borderRadius: '8px', 
+          border: '1px solid #e2e8f0', 
+          boxShadow: '0 2px 4px rgba(0,0,0,0.02)' 
+        }}>
+          <span style={{ fontSize: '12px', color: '#718096', fontWeight: 'bold', letterSpacing: '0.05em' }}>
+            TOTAL UNIQUE VIEWS
+          </span>
+          <h1 style={{ margin: '8px 0 0 0', color: '#007bff', fontSize: '2.5rem', fontWeight: '800' }}>
+            {metrics.summary.totalViews.toLocaleString()}
+          </h1>
         </div>
-        <div style={{ background: 'white', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-          <span style={{ fontSize: '14px', color: '#718096', fontWeight: '500' }}>PUBLISHED CONTENT</span>
-          <h1 style={{ margin: '8px 0 0 0', color: '#2d3748', fontSize: '2.5rem' }}>{metrics.summary.totalPosts}</h1>
+
+        {/* Card 2: Total Posts Written */}
+        <div style={{ 
+          background: 'white', 
+          padding: '20px', 
+          borderRadius: '8px', 
+          border: '1px solid #e2e8f0', 
+          boxShadow: '0 2px 4px rgba(0,0,0,0.02)' 
+        }}>
+          <span style={{ fontSize: '12px', color: '#718096', fontWeight: 'bold', letterSpacing: '0.05em' }}>
+            PUBLISHED CONTENT
+          </span>
+          <h1 style={{ margin: '8px 0 0 0', color: '#2d3748', fontSize: '2.5rem', fontWeight: '800' }}>
+            {metrics.summary.totalPosts}
+          </h1>
         </div>
       </div>
 
-      {/* Traffic analytics timeline chart display component */}
+      {/* Traffic analytics timeline line/bar chart component */}
       <AnalyticsChart data={metrics.timeline} />
 
-      {/* Individual list metrics table module management */}
-      <h3 style={{ marginTop: '30px', marginBottom: '15px' }}>Content Breakdown Performance</h3>
-      <div style={{ overflowX: 'auto', background: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+      {/* Content performance details breakdown */}
+      <h3 style={{ marginTop: '30px', marginBottom: '15px', fontSize: '1.3rem', color: '#2d3748' }}>
+        Content Breakdown Performance
+      </h3>
+      
+      <div style={{ 
+        overflowX: 'auto', 
+        background: 'white', 
+        borderRadius: '8px', 
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+      }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '15px' }}>
           <thead>
-            <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #e2e8f0' }}>
-              <th style={{ padding: '12px 16px', color: '#4a5568' }}>Article Title</th>
-              <th style={{ padding: '12px 16px', color: '#4a5568' }}>Published Date</th>
-              <th style={{ padding: '12px 16px', color: '#4a5568', textAlign: 'right' }}>Unique Views</th>
+            <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #e2e8f0' }}>
+              <th style={{ padding: '12px 16px', color: '#4a5568', fontWeight: '600' }}>Article Title</th>
+              <th style={{ padding: '12px 16px', color: '#4a5568', fontWeight: '600' }}>Published Date</th>
+              <th style={{ padding: '12px 16px', color: '#4a5568', fontWeight: '600', textAlign: 'right' }}>Unique Views</th>
             </tr>
           </thead>
           <tbody>
             {metrics.posts.length === 0 ? (
-              <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: '#a0aec0' }}>No articles published yet.</td></tr>
+              <tr>
+                <td colSpan="3" style={{ padding: '30px', textAlign: 'center', color: '#a0aec0' }}>
+                  No articles published yet. Write something to see your metrics!
+                </td>
+              </tr>
             ) : (
               metrics.posts.map(post => (
-                <tr key={post.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '12px 16px', fontWeight: '500', color: '#1a202c' }}>{post.title}</td>
-                  <td style={{ padding: '12px 16px', color: '#718096' }}>{new Date(post.created_at).toLocaleDateString()}</td>
-                  <td style={{ padding: '12px 16px', fontWeight: 'bold', color: '#007bff', textAlign: 'right' }}>{post.views}</td>
+                <tr key={post.id} style={{ borderBottom: '1px solid #e2e8f0', transition: 'background 0.2s' }}>
+                  <td style={{ padding: '14px 16px', fontWeight: '500', color: '#1a202c' }}>
+                    {post.title}
+                  </td>
+                  <td style={{ padding: '14px 16px', color: '#718096' }}>
+                    {new Date(post.created_at).toLocaleDateString(undefined, { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
+                  </td>
+                  <td style={{ 
+                    padding: '14px 16px', 
+                    fontWeight: 'bold', 
+                    color: '#007bff', 
+                    textAlign: 'right',
+                    fontSize: '16px' 
+                  }}>
+                    {(parseInt(post.views) || 0).toLocaleString()}
+                  </td>
                 </tr>
               ))
             )}
