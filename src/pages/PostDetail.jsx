@@ -1,7 +1,7 @@
 // File Location: src/pages/PostDetail.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import PostCard from '../components/PostCard';
+import PostCard from '../components/PostCard'; //  Correct path
 
 export default function PostDetail({ user }) {
   const { id } = useParams();
