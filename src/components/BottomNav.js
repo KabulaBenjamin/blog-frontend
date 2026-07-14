@@ -32,6 +32,15 @@ function BottomNav({ user }) {
         <span className="nav-label">Profile</span>
       </NavLink>
 
+      {/* 📈 Dashboard Tab (Protected Flow: Only accessible when logged in) */}
+      <NavLink 
+        to={user ? "/dashboard" : "/signin"} 
+        className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
+      >
+        <span className="nav-icon" role="img" aria-label="dashboard">📈</span>
+        <span className="nav-label">Dashboard</span>
+      </NavLink>
+
       {/* 🔔 Notifications Tab */}
       <NavLink 
         to={user ? "/notifications" : "/signin"} 
