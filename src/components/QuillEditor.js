@@ -50,6 +50,10 @@ function QuillEditor({ post, user, onSaved }) {
   const [title, setTitle] = useState(post ? post.title || '' : '');
   const [content, setContent] = useState(post ? post.content || '' : '');
   const [liveLink, setLiveLink] = useState(post ? post.live_link || '' : '');
+  
+  // Two-tiered Taxonomy States
+  const [category, setCategory] = useState(post ? post.category || 'tech' : 'tech');
+  const [tags, setTags] = useState(post ? post.tags || '' : '');
 
   const quillRef = useRef(null);
 
@@ -135,13 +139,23 @@ function QuillEditor({ post, user, onSaved }) {
       return;
     }
 
+    // Clean, lowercase, and slugify tag tokens (e.g. "Web Dev" -> "web-dev")
+    const cleanTags = tags
+      .toLowerCase()
+      .split(',')
+      .map(t => t.trim().replace(/\s+/g, '-'))
+      .filter(Boolean)
+      .join(', ');
+
     try {
-      // 🛠️ Construct clean JSON payload data object instead of multi-part FormData
+      // 🛠️ Construct payload
       const postData = {
         title: title,
         content: content || '',
         editor_type: 'quill',
-        live_link: liveLink || ''
+        live_link: liveLink || '',
+        category: category,
+        tags: cleanTags
       };
 
       let url = 'https://blog-2y55.onrender.com/posts';
@@ -213,7 +227,39 @@ function QuillEditor({ post, user, onSaved }) {
         placeholder="Post title"
         value={title}
         onChange={e => setTitle(e.target.value)}
+        style={{ width: '100%', padding: '10px', marginBottom: '15px', borderRadius: '4px', border: '1px solid #ddd', boxSizing: 'border-box' }}
       />
+
+      {/* Category Dropdown Selection */}
+      <div style={{ marginBottom: '15px' }}>
+        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px', color: '#4a5568' }}>
+          Select Core Content Pillar:
+        </label>
+        <select 
+          value={category} 
+          onChange={e => setCategory(e.target.value)}
+          style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd', background: '#fff' }}
+        >
+          <option value="tech">💻 Tech (Software & Engineering)</option>
+          <option value="education">📐 Education (High School Math & Science)</option>
+          <option value="ai-research">🤖 AI Research (ML & Neural Networks)</option>
+          <option value="faith">🌱 Faith (Reflections & Theology)</option>
+        </select>
+      </div>
+
+      {/* Subcategories (Tags) Input */}
+      <div style={{ marginBottom: '15px' }}>
+        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px', color: '#4a5568' }}>
+          Subcategories / Tags (Comma-separated):
+        </label>
+        <input 
+          type="text" 
+          placeholder="e.g. javascript, calculus, thermodynamics, christianity" 
+          value={tags} 
+          onChange={e => setTags(e.target.value)}
+          style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd', boxSizing: 'border-box' }}
+        />
+      </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
         <button type="button" className="html-paste-btn" onClick={pasteRawHtmlDirectly}>
@@ -235,8 +281,11 @@ function QuillEditor({ post, user, onSaved }) {
         placeholder="Live link"
         value={liveLink}
         onChange={e => setLiveLink(e.target.value)}
+        style={{ width: '100%', padding: '10px', marginTop: '15px', marginBottom: '15px', borderRadius: '4px', border: '1px solid #ddd', boxSizing: 'border-box' }}
       />
-      <button onClick={handleSave}>{post ? 'Update Post' : 'Create Post'}</button>
+      <button onClick={handleSave} style={{ padding: '10px 20px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+        {post ? 'Update Post' : 'Create Post'}
+      </button>
     </div>
   );
 }

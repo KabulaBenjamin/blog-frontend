@@ -9,6 +9,16 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
 
   const isOwner = user && String(user.id) === String(post.user_id);
 
+  // Category Theme Helper Map
+  const categoryTheme = {
+    tech: { bg: '#e3f2fd', color: '#0d47a1', label: '💻 Tech' },
+    education: { bg: '#e8f5e9', color: '#1b5e20', label: '📐 Education' },
+    'ai-research': { bg: '#f3e5f5', color: '#4a148c', label: '🤖 AI Research' },
+    faith: { bg: '#fff3e0', color: '#e65100', label: '🌱 Faith' }
+  };
+
+  const theme = categoryTheme[post.category] || categoryTheme.tech;
+
   const handleLike = async () => {
     try {
       const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}/like`, { 
@@ -68,41 +78,82 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   };
 
   return (
-    <div className="post-card" style={{ marginBottom: '20px', border: '1px solid #ddd', padding: '15px', borderRadius: '6px', background: '#fff' }}>
-      {/* 💡 Clicking the title routes to the dedicated single-view details page */}
-      <h2 style={{ cursor: 'pointer', color: '#007bff' }} onClick={() => navigate(`/posts/${post.id}`)}>
+    <div className="post-card" style={{ marginBottom: '20px', border: '1px solid #e2e8f0', padding: '20px', borderRadius: '8px', background: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+      
+      {/* Category Pillar Badge */}
+      <div style={{ marginBottom: '10px' }}>
+        <span style={{ 
+          fontSize: '11px', 
+          fontWeight: 'bold', 
+          textTransform: 'uppercase', 
+          padding: '4px 10px', 
+          borderRadius: '12px',
+          background: theme.bg,
+          color: theme.color,
+          letterSpacing: '0.03em'
+        }}>
+          {theme.label}
+        </span>
+      </div>
+
+      {/* Title */}
+      <h2 style={{ cursor: 'pointer', color: '#1a202c', marginTop: '5px', marginBottom: '12px', fontSize: '1.5rem', fontWeight: '700' }} onClick={() => navigate(`/posts/${post.id}`)}>
         {post.title}
       </h2>
+
+      {/* Subcategory Tag List */}
+      {post.tags && post.tags.trim() !== "" && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '15px' }}>
+          {post.tags.split(',').map((tag, idx) => (
+            <span key={idx} style={{ 
+              fontSize: '11px', 
+              background: '#f1f5f9', 
+              color: '#64748b', 
+              padding: '2px 8px', 
+              borderRadius: '4px',
+              fontWeight: '500'
+            }}>
+              #{tag.trim()}
+            </span>
+          ))}
+        </div>
+      )}
       
-      {/* Truncates text on homepage feed so users have an incentive to click into the unique post page */}
+      {/* Content Area */}
       <div 
         dangerouslySetInnerHTML={{ 
           __html: isFeedMode && post.content?.length > 300 
             ? post.content.substring(0, 300) + '...' 
             : post.content 
         }} 
+        style={{ color: '#4a5568', lineHeight: '1.7', fontSize: '1.05rem' }}
       />
 
       {post.live_link && (
-        <p><a href={post.live_link} target="_blank" rel="noopener noreferrer">Live Link</a></p>
+        <p style={{ marginTop: '15px' }}>
+          🔗 <a href={post.live_link} target="_blank" rel="noopener noreferrer" style={{ color: '#007bff', fontWeight: '500', textDecoration: 'none' }}>Live Project Link</a>
+        </p>
       )}
-      <p><strong>By:</strong> {post.username || 'Unknown'}</p>
-      <p>👍 {post.likes || 0} | 💬 {Array.isArray(post.comments) ? post.comments.length : (post.comments || 0)}</p>
 
-      <div className="actions" style={{ display: 'flex', gap: '8px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '15px', fontSize: '0.9rem', color: '#64748b' }}>
+        <p style={{ margin: 0 }}><strong>By:</strong> {post.username || 'Unknown'}</p>
+        <p style={{ margin: 0 }}>👍 {post.likes || 0} | 💬 {Array.isArray(post.comments) ? post.comments.length : (post.comments || 0)}</p>
+      </div>
+
+      <div className="actions" style={{ display: 'flex', gap: '8px', marginTop: '15px' }}>
         {isFeedMode ? (
-          <button onClick={() => navigate(`/posts/${post.id}`)} style={{ background: '#28a745', color: '#fff' }}>Read Full Post</button>
+          <button onClick={() => navigate(`/posts/${post.id}`)} style={{ background: '#007bff', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Read Full Post</button>
         ) : (
           <>
-            <button onClick={handleLike}>Like</button>
-            <button onClick={() => setShowCommentBox(!showCommentBox)}>Comment</button>
+            <button onClick={handleLike} style={{ background: '#f1f5f9', color: '#4a5568', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Like</button>
+            <button onClick={() => setShowCommentBox(!showCommentBox)} style={{ background: '#f1f5f9', color: '#4a5568', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Comment</button>
           </>
         )}
-        <button onClick={handleShare}>Share</button>
+        <button onClick={handleShare} style={{ background: '#f1f5f9', color: '#4a5568', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Share</button>
         {isOwner && (
           <>
-            <button onClick={() => navigate(`/edit/${post.id}`)}>Edit</button>
-            <button onClick={handleDelete}>Delete</button>
+            <button onClick={() => navigate(`/edit/${post.id}`)} style={{ background: '#fff', color: '#4a5568', border: '1px solid #cbd5e1', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Edit</button>
+            <button onClick={handleDelete} style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Delete</button>
           </>
         )}
       </div>
@@ -116,7 +167,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
             onChange={(e) => setCommentText(e.target.value)}
             style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid #ddd' }}
           />
-          <button type="submit">Post</button>
+          <button type="submit" style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Post</button>
         </form>
       )}
     </div>
