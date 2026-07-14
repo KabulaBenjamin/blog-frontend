@@ -47,7 +47,7 @@ h1, h2, h3 {
    ========================================================================= */
 
 /* Post cards */
-.post {
+.post, .post-card {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -58,41 +58,56 @@ h1, h2, h3 {
 }
 
 @media (min-width: 600px) {
-  .post {
+  .post, .post-card {
     padding: 24px; /* Gives elements breathing room on wider screens */
   }
 }
 
-.post h3 {
+.post h3, .post-card h2 {
   margin-top: 0;
   font-size: 1.35rem;
 }
 
 @media (min-width: 600px) {
-  .post h3 {
+  .post h3, .post-card h2 {
     font-size: 1.6rem; /* Automatically increases headings dynamically on desktop views */
   }
 }
 
 /* Post view typography enhancement for comfortable long-form reading */
-.post p {
+.post p, .post-card p {
   font-size: 1.05rem; /* ~17px minimum rule for mobile readability screens without strain */
   line-height: 1.7; /* Generous spacing between paragraphs */
 }
 
 @media (min-width: 768px) {
-  .post p {
+  .post p, .post-card p {
     font-size: 1.125rem; /* Scales up to 18px on computer monitors */
   }
 }
 
-/* Images dynamic layout safety */
-.post img {
-  max-width: 100%;
+/* 📱 MOBILE RESPONSIVE IMAGES & MEDIA 
+   (Prevents images and rich text graphics from overflowing mobile screens) */
+.post img,
+.post-card img,
+.post div img,
+.post-card div img,
+main img {
+  max-width: 100% !important; /* Prevents image from exceeding parent width boundaries */
+  height: auto !important;      /* Dynamically scales height proportionally to maintain aspect ratio */
+  display: block;               /* Cleans up block inline-alignment context */
+  margin: 12px auto;            /* Centers image and introduces vertical breathing space */
+  border-radius: 6px;           /* Subtle corner rounding to match card aesthetic */
+}
+
+/* Responsive constraints for video streams, frames, and rich text editor links */
+.post iframe,
+.post-card iframe,
+.post video,
+.post-card video {
+  max-width: 100% !important;
   height: auto;
   border-radius: 6px;
-  display: block;
-  margin: 12px auto;
 }
 
 .post-actions {
@@ -202,7 +217,7 @@ footer a:hover {
   border-color: #2d3748;
 }
 
-.dark-theme .post, .dark-theme .profile {
+.dark-theme .post, .dark-theme .post-card, .dark-theme .profile {
   background: #1e1e1e;
   border-color: #2d3748;
 }
