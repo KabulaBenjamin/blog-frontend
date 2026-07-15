@@ -73,6 +73,16 @@ function QuillEditor({ post, user, onSaved }) {
 
   // Memoized modules configuration to prevent focus drops during active key input states
   const modules = useMemo(() => ({
+    // 🛠️ RELAXED CLIPBOARD CONFIGURATION TO ALLOW COMPLEX HTML/DIVS
+    clipboard: {
+      matchVisual: false, // Stop Quill from aggressively re-calculating visual layouts
+      matchers: [
+        // Ensure complex standard DIV wrappers are preserved instead of stripped
+        ['DIV', (node, delta) => {
+          return delta;
+        }]
+      ]
+    },
     toolbar: {
       container: [
         [{ 'font': ['serif', 'monospace', 'sans-serif', 'times-new-roman', 'arial', 'georgia'] }],
