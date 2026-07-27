@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 // Required for LaTeX math formula rendering
 import 'katex/dist/katex.min.css';
@@ -141,11 +142,11 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
         </div>
       )}
       
-      {/* Content Area with Markdown & LaTeX Support */}
+      {/* Content Area with HTML, Markdown & LaTeX Support */}
       <div style={{ color: '#4a5568', lineHeight: '1.7', fontSize: '1.05rem' }}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
-          rehypePlugins={[rehypeKatex]}
+          rehypePlugins={[rehypeRaw, rehypeKatex]}
         >
           {displayContent}
         </ReactMarkdown>
