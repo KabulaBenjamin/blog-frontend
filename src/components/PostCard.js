@@ -1,6 +1,13 @@
 // File Location: src/components/PostCard.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import remarkGfm from 'remark-gfm';
+
+// Required for LaTeX math formula rendering
+import 'katex/dist/katex.min.css';
 
 function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const navigate = useNavigate();
@@ -21,7 +28,6 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const theme = categoryTheme[post.category] || categoryTheme.tech;
 
   // Check if current user has already liked this post.
-  // Assumes your backend includes a `liked_by_users` array of user IDs on the post object.
   const hasLiked = post.liked_by_users?.includes(user?.id);
 
   const handleLike = async () => {
@@ -87,6 +93,12 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
     }
   };
 
+  // Truncate text cleanly for Feed Mode
+  const rawContent = post.content || '';
+  const displayContent = isFeedMode && rawContent.length > 300 
+    ? rawContent.substring(0, 300) + '...' 
+    : rawContent;
+
   return (
     <div className="post-card" style={{ marginBottom: '20px', border: '1px solid #e2e8f0', padding: '20px', borderRadius: '8px', background: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
       
@@ -129,15 +141,15 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
         </div>
       )}
       
-      {/* Content Area */}
-      <div 
-        dangerouslySetInnerHTML={{ 
-          __html: isFeedMode && post.content?.length > 300 
-            ? post.content.substring(0, 300) + '...' 
-            : post.content 
-        }} 
-        style={{ color: '#4a5568', lineHeight: '1.7', fontSize: '1.05rem' }}
-      />
+      {/* Content Area with Markdown & LaTeX Support */}
+      <div style={{ color: '#4a5568', lineHeight: '1.7', fontSize: '1.05rem' }}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex]}
+        >
+          {displayContent}
+        </ReactMarkdown>
+      </div>
 
       {post.live_link && (
         <p style={{ marginTop: '15px' }}>
