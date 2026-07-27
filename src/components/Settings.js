@@ -121,40 +121,37 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
     setPasswordMessage('');
     setIsUpdatingPassword(true);
 
+    const token = getAuthToken();
+
     try {
-      const tokenRes = await fetch(`${BACKEND_URL}/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user.username })
+      const response = await fetch(`${BACKEND_URL}/change-password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify({ newPassword }),
+        credentials: 'include'
       });
-      const tokenData = await tokenRes.json();
 
-      if (!tokenRes.ok || !tokenData.token) {
-        throw new Error(tokenData.error || 'Failed to initialize password updates.');
-      }
+      const data = await response.json().catch(() => ({}));
 
-      const resetRes = await fetch(`${BACKEND_URL}/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: tokenData.token, newPassword })
-      });
-      const resetData = await resetRes.json();
-
-      if (resetRes.ok) {
+      if (response.ok && data.success) {
         setPasswordMessage('Password updated successfully!');
         setNewPassword('');
         setTimeout(() => setShowPasswordForm(false), 2000);
       } else {
-        setPasswordError(resetData.error || 'Failed to change password.');
+        setPasswordError(data.error || 'Failed to update password.');
       }
     } catch (err) {
-      setPasswordError(err.message || 'Network error updating credentials.');
+      console.error("Password update error:", err);
+      setPasswordError('Network error updating password.');
     } finally {
       setIsUpdatingPassword(false);
     }
   };
 
-  // 4. Logged-in Username Update Handler (With Header Token Support)
+  // 4. Logged-in Username Update Handler
   const handleChangeUsernameDirectly = async (e) => {
     e.preventDefault();
     setUsernameError('');
