@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 function Settings({ user, onLogoutSuccess, onSignedIn }) {
-  // Simple Dark Mode State management
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem('theme') === 'dark'
   );
@@ -22,7 +21,6 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
   const [usernameError, setUsernameError] = useState('');
   const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
 
-  // Centralized backend API URL target
   const BACKEND_URL = 'https://blog-2y55.onrender.com';
 
   useEffect(() => {
@@ -35,17 +33,28 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
     }
   }, [darkMode]);
 
+  // Helper to extract authentication token
+  const getAuthToken = () => {
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    return user?.token || storedUser.token;
+  };
+
   // 1. Log Out Handler
   const handleLogout = async () => {
     setIsLoggingOut(true);
+    const token = getAuthToken();
     try {
       const response = await fetch(`${BACKEND_URL}/logout`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
         credentials: 'include' 
       });
 
       if (response.ok) {
+        localStorage.removeItem('user');
         alert("Logged out cleanly.");
         if (typeof onLogoutSuccess === 'function') {
           onLogoutSuccess(); 
@@ -72,17 +81,22 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
     if (!confirmation) return;
 
     setIsDeleting(true);
+    const token = getAuthToken();
 
     try {
       const response = await fetch(`${BACKEND_URL}/delete-account`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
         credentials: 'include'
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (response.ok && data.success) {
+        localStorage.removeItem('user');
         alert("Your account has been successfully deleted.");
         if (typeof onLogoutSuccess === 'function') {
           onLogoutSuccess();
@@ -140,39 +154,46 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
     }
   };
 
-  // 4. Logged-in Username Update Handler
+  // 4. Logged-in Username Update Handler (With Header Token Support)
   const handleChangeUsernameDirectly = async (e) => {
     e.preventDefault();
     setUsernameError('');
     setUsernameMessage('');
     setIsUpdatingUsername(true);
 
+    const token = getAuthToken();
+
     try {
       const response = await fetch(`${BACKEND_URL}/change-username`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
         body: JSON.stringify({ newUsername }),
         credentials: 'include'
       });
       
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (response.ok && data.success) {
         setUsernameMessage('Username updated perfectly!');
         setNewUsername('');
         
-        // Sync local storage state
+        // Save user and new token in localStorage
         localStorage.setItem('user', JSON.stringify(data.user));
         
-        // Push state notification callback to App component context layer
         if (typeof onSignedIn === 'function') {
           onSignedIn(data.user);
         }
         
         setTimeout(() => setShowUsernameForm(false), 2000);
       } else {
-        // Displays backend response directly (e.g., "Username is already taken.")
-        setUsernameError(data.error || 'Failed to alter identity username.');
+        if (response.status === 401) {
+          setUsernameError('Session expired. Please log out and log back in.');
+        } else {
+          setUsernameError(data.error || 'Failed to alter identity username.');
+        }
       }
     } catch (err) {
       console.error("Username update error:", err);
