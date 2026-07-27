@@ -6,6 +6,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import he from 'he'; // HTML entity decoder
 
 // Required for LaTeX math formula rendering
 import 'katex/dist/katex.min.css';
@@ -94,11 +95,13 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
     }
   };
 
-  // Truncate text cleanly for Feed Mode
-  const rawContent = post.content || '';
-  const displayContent = isFeedMode && rawContent.length > 300 
-    ? rawContent.substring(0, 300) + '...' 
-    : rawContent;
+  // 1. Decode encoded HTML entities (&lt;h1&gt; -> <h1>)
+  const decodedContent = he.decode(post.content || '');
+
+  // 2. Truncate text cleanly for Feed Mode
+  const displayContent = isFeedMode && decodedContent.length > 300 
+    ? decodedContent.substring(0, 300) + '...' 
+    : decodedContent;
 
   return (
     <div className="post-card" style={{ marginBottom: '20px', border: '1px solid #e2e8f0', padding: '20px', borderRadius: '8px', background: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
@@ -142,7 +145,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
         </div>
       )}
       
-      {/* Content Area with HTML, Markdown & LaTeX Support */}
+      {/* Content Area with Decoded HTML, Markdown & LaTeX Support */}
       <div style={{ color: '#4a5568', lineHeight: '1.7', fontSize: '1.05rem' }}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
