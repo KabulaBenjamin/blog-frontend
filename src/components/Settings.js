@@ -171,10 +171,12 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
         
         setTimeout(() => setShowUsernameForm(false), 2000);
       } else {
+        // Displays backend response directly (e.g., "Username is already taken.")
         setUsernameError(data.error || 'Failed to alter identity username.');
       }
     } catch (err) {
-      setUsernameError('Network communication drop updating identity parameters.');
+      console.error("Username update error:", err);
+      setUsernameError('Network communication error updating username.');
     } finally {
       setIsUpdatingUsername(false);
     }
