@@ -11,16 +11,28 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetches aggregate data from your live backend
+    // Fetches aggregate data from your live backend using cookie credentials
     fetch('https://blog-2y55.onrender.com/api/analytics/dashboard', {
-      headers: { 
-        'Authorization': `Bearer ${localStorage.getItem('token')}` // Matches your session storage pattern
-      } 
+      method: 'GET',
+      credentials: 'include', // Ensures HttpOnly cookie auth session is included
+      headers: {
+        'Content-Type': 'application/json'
+      }
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then(data => { 
-        if (!data.error) {
-          setMetrics(data);
+        if (data && !data.error) {
+          setMetrics({
+            summary: {
+              totalViews: data.summary?.totalViews || 0,
+              totalPosts: data.summary?.totalPosts || 0
+            },
+            timeline: data.timeline || [],
+            posts: data.posts || []
+          });
         } 
       })
       .catch(err => console.error('Metrics fetch error:', err))
@@ -34,6 +46,11 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  // Safe destructuring fallbacks
+  const totalViews = metrics.summary?.totalViews || 0;
+  const totalPosts = metrics.summary?.totalPosts || 0;
+  const postsList = metrics.posts || [];
 
   return (
     <div className="container" style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
@@ -60,7 +77,7 @@ export default function Dashboard() {
             TOTAL UNIQUE VIEWS
           </span>
           <h1 style={{ margin: '8px 0 0 0', color: '#007bff', fontSize: '2.5rem', fontWeight: '800' }}>
-            {metrics.summary.totalViews.toLocaleString()}
+            {totalViews.toLocaleString()}
           </h1>
         </div>
 
@@ -76,13 +93,13 @@ export default function Dashboard() {
             PUBLISHED CONTENT
           </span>
           <h1 style={{ margin: '8px 0 0 0', color: '#2d3748', fontSize: '2.5rem', fontWeight: '800' }}>
-            {metrics.summary.totalPosts}
+            {totalPosts}
           </h1>
         </div>
       </div>
 
       {/* Traffic analytics timeline line/bar chart component */}
-      <AnalyticsChart data={metrics.timeline} />
+      <AnalyticsChart data={metrics.timeline || []} />
 
       {/* Content performance details breakdown */}
       <h3 style={{ marginTop: '30px', marginBottom: '15px', fontSize: '1.3rem', color: '#2d3748' }}>
@@ -105,24 +122,24 @@ export default function Dashboard() {
             </tr>
           </thead>
           <tbody>
-            {metrics.posts.length === 0 ? (
+            {postsList.length === 0 ? (
               <tr>
                 <td colSpan="3" style={{ padding: '30px', textAlign: 'center', color: '#a0aec0' }}>
                   No articles published yet. Write something to see your metrics!
                 </td>
               </tr>
             ) : (
-              metrics.posts.map(post => (
+              postsList.map(post => (
                 <tr key={post.id} style={{ borderBottom: '1px solid #e2e8f0', transition: 'background 0.2s' }}>
                   <td style={{ padding: '14px 16px', fontWeight: '500', color: '#1a202c' }}>
                     {post.title}
                   </td>
                   <td style={{ padding: '14px 16px', color: '#718096' }}>
-                    {new Date(post.created_at).toLocaleDateString(undefined, { 
+                    {post.created_at ? new Date(post.created_at).toLocaleDateString(undefined, { 
                       year: 'numeric', 
                       month: 'short', 
                       day: 'numeric' 
-                    })}
+                    }) : 'N/A'}
                   </td>
                   <td style={{ 
                     padding: '14px 16px', 
