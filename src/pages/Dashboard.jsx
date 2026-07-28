@@ -9,21 +9,25 @@ export default function Dashboard() {
     posts: [] 
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetches aggregate data from your live backend using cookie credentials
-    fetch('https://blog-2y55.onrender.com/api/analytics/dashboard', {
-      method: 'GET',
-      credentials: 'include', // Ensures HttpOnly cookie auth session is included
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
-      .then(data => { 
+    const fetchDashboardMetrics = async () => {
+      try {
+        const response = await fetch('https://blog-2y55.onrender.com/api/analytics/dashboard', {
+          method: 'GET',
+          credentials: 'include', // Ensures HttpOnly cookie auth session is included
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
         if (data && !data.error) {
           setMetrics({
             summary: {
@@ -33,16 +37,31 @@ export default function Dashboard() {
             timeline: data.timeline || [],
             posts: data.posts || []
           });
-        } 
-      })
-      .catch(err => console.error('Metrics fetch error:', err))
-      .finally(() => setLoading(false));
+        }
+      } catch (err) {
+        console.error('Metrics fetch error:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardMetrics();
   }, []);
 
   if (loading) {
     return (
       <div className="container" style={{ padding: '40px 20px', textAlign: 'center' }}>
         <h3>Compiling data summary layers...</h3>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container" style={{ padding: '40px 20px', textAlign: 'center', color: '#e53e3e' }}>
+        <h3>Failed to load analytics dashboard</h3>
+        <p>{error}</p>
       </div>
     );
   }
@@ -98,7 +117,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Traffic analytics timeline line/bar chart component */}
+      {/* Traffic analytics timeline chart */}
       <AnalyticsChart data={metrics.timeline || []} />
 
       {/* Content performance details breakdown */}
@@ -148,7 +167,7 @@ export default function Dashboard() {
                     textAlign: 'right',
                     fontSize: '16px' 
                   }}>
-                    {(parseInt(post.views) || 0).toLocaleString()}
+                    {(parseInt(post.views, 10) || 0).toLocaleString()}
                   </td>
                 </tr>
               ))
