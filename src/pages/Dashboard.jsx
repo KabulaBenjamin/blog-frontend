@@ -16,7 +16,7 @@ export default function Dashboard() {
       try {
         const response = await fetch('https://blog-2y55.onrender.com/api/analytics/dashboard', {
           method: 'GET',
-          credentials: 'include', // Ensures HttpOnly cookie auth session is included
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json'
           }
@@ -66,7 +66,6 @@ export default function Dashboard() {
     );
   }
 
-  // Safe destructuring fallbacks
   const totalViews = metrics.summary?.totalViews || 0;
   const totalPosts = metrics.summary?.totalPosts || 0;
   const postsList = metrics.posts || [];
@@ -77,14 +76,13 @@ export default function Dashboard() {
         Publisher Workstation Dashboard
       </h2>
       
-      {/* Overview Stats Cards Grid */}
+      {/* Overview Stats Cards */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
         gap: '16px', 
         marginBottom: '20px' 
       }}>
-        {/* Card 1: Total Unique Views */}
         <div style={{ 
           background: 'white', 
           padding: '20px', 
@@ -100,7 +98,6 @@ export default function Dashboard() {
           </h1>
         </div>
 
-        {/* Card 2: Total Posts Written */}
         <div style={{ 
           background: 'white', 
           padding: '20px', 
@@ -117,10 +114,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Traffic analytics timeline chart */}
+      {/* Main Overall Traffic Chart */}
       <AnalyticsChart data={metrics.timeline || []} />
 
-      {/* Content performance details breakdown */}
+      {/* Content Breakdown Performance Table */}
       <h3 style={{ marginTop: '30px', marginBottom: '15px', fontSize: '1.3rem', color: '#2d3748' }}>
         Content Breakdown Performance
       </h3>
@@ -135,7 +132,8 @@ export default function Dashboard() {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '15px' }}>
           <thead>
             <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #e2e8f0' }}>
-              <th style={{ padding: '12px 16px', color: '#4a5568', fontWeight: '600' }}>Article Title</th>
+              <th style={{ padding: '12px 16px', color: '#4a5568', fontWeight: '600', width: '40%' }}>Article Title</th>
+              <th style={{ padding: '12px 16px', color: '#4a5568', fontWeight: '600', width: '35%' }}>7-Day Traffic Trend</th>
               <th style={{ padding: '12px 16px', color: '#4a5568', fontWeight: '600' }}>Published Date</th>
               <th style={{ padding: '12px 16px', color: '#4a5568', fontWeight: '600', textAlign: 'right' }}>Unique Views</th>
             </tr>
@@ -143,16 +141,28 @@ export default function Dashboard() {
           <tbody>
             {postsList.length === 0 ? (
               <tr>
-                <td colSpan="3" style={{ padding: '30px', textAlign: 'center', color: '#a0aec0' }}>
+                <td colSpan="4" style={{ padding: '30px', textAlign: 'center', color: '#a0aec0' }}>
                   No articles published yet. Write something to see your metrics!
                 </td>
               </tr>
             ) : (
               postsList.map(post => (
-                <tr key={post.id} style={{ borderBottom: '1px solid #e2e8f0', transition: 'background 0.2s' }}>
+                <tr key={post.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
                   <td style={{ padding: '14px 16px', fontWeight: '500', color: '#1a202c' }}>
-                    {post.title}
+                    🔥 {post.title}
                   </td>
+                  
+                  {/* Inline Mini Trend Graph */}
+                  <td style={{ padding: '8px 16px', verticalAlign: 'middle' }}>
+                    {post.timeline && post.timeline.length > 0 ? (
+                      <div style={{ height: '50px', width: '100%', minWidth: '150px' }}>
+                        <AnalyticsChart data={post.timeline} />
+                      </div>
+                    ) : (
+                      <span style={{ color: '#a0aec0', fontSize: '12px' }}>No trend data</span>
+                    )}
+                  </td>
+
                   <td style={{ padding: '14px 16px', color: '#718096' }}>
                     {post.created_at ? new Date(post.created_at).toLocaleDateString(undefined, { 
                       year: 'numeric', 
@@ -160,6 +170,7 @@ export default function Dashboard() {
                       day: 'numeric' 
                     }) : 'N/A'}
                   </td>
+
                   <td style={{ 
                     padding: '14px 16px', 
                     fontWeight: 'bold', 
