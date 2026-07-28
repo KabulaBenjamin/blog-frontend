@@ -24,6 +24,7 @@ import Settings from './components/Settings';
 // New Feature Views
 import Home from './pages/Home';              // 🏠 New structured Home layout
 import Dashboard from './pages/Dashboard';    // 📊 New publisher analytics dashboard
+import AdminDashboard from './pages/AdminDashboard'; // 👑 Superuser control center
 import PostDetail from './pages/PostDetail';  // 📝 Dedicated single post details page
 
 // Added Navigate here to protect client-side routes gracefully
@@ -187,6 +188,18 @@ function App() {
                     <Dashboard user={user} />
                   ) : (
                     <Navigate to="/signin" replace />
+                  )
+                } 
+              />
+
+              {/* 👑 Superuser Control Dashboard Route (Protected) */}
+              <Route 
+                path="/admin" 
+                element={
+                  user && (user.username === 'Blog_Admin' || user.role === 'admin') ? (
+                    <AdminDashboard user={user} />
+                  ) : (
+                    <Navigate to="/" replace />
                   )
                 } 
               />
