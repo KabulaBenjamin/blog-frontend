@@ -1,147 +1,154 @@
 /* ===================================================
-   1. EXISTING CARD LAYOUT STYLES (Preserved)
+   EDITORIAL BLOG CARD LAYOUT & TYPOGRAPHY
    =================================================== */
 
+/* Core Post Container */
 .post-card {
-  border: 1px solid #ddd;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 16px;
-  margin: 12px;
-  background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 0; /* Overflow padding handled inside layout sections */
+  margin: 20px 0;
+  background-color: #f7f6f2; /* Warm editorial light background */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  font-family: 'Georgia', serif;
 }
 
-.title {
-  font-size: 20px;
-  margin: 8px 0;
+/* Header Section (Dark Hero Style) */
+.post-card-hero {
+  background-color: #0b131e; /* Deep navy / dark charcoal hero background */
+  color: #f8fafc;
+  padding: 32px 28px;
+  border-bottom: 1px solid #1e293b;
 }
 
-.meta {
-  color: #999;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.preview {
-  font-size: 16px;
+.post-card-hero .pill-category {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #e2e8f0;
   margin-bottom: 12px;
 }
 
-.actions {
+.post-card-hero h2 {
+  font-family: 'Georgia', serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #ffffff;
+  margin: 10px 0 16px 0;
+}
+
+.post-card-hero p.hero-subtitle {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin-bottom: 24px;
+}
+
+.post-card-hero .hero-meta {
   display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  color: #555;
-  margin-top: 12px;
+  gap: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
 }
 
-.post-media {
-  width: 100%;
-  max-height: 300px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
-
-
-/* ===================================================
-   2. ARTICLE BODY CONTENT TYPOGRAPHY (New Additions)
-   =================================================== */
-
+/* Article Content Body */
 .blog-rendered-content {
+  padding: 28px;
   font-family: 'Georgia', 'Merriweather', serif;
   font-size: 1.12rem;
   line-height: 1.8;
   color: #2d3748;
 }
 
-/* Headings generated inside content */
-.blog-rendered-content h1 {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 2rem;
-  font-weight: 800;
-  color: #0f172a;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
+/* Editorial Content Headings */
+.blog-rendered-content h1,
 .blog-rendered-content h2 {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-top: 1.75rem;
-  margin-bottom: 0.75rem;
-  letter-spacing: -0.01em;
+  font-family: 'Georgia', serif !important;
+  font-size: 1.6rem !important;
+  font-weight: 700 !important;
+  color: #1a202c !important;
+  margin-top: 2rem !important;
+  margin-bottom: 0.8rem !important;
+  line-height: 1.3 !important;
 }
 
 .blog-rendered-content h3 {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #334155;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: #718096 !important;
+  margin-top: 1.8rem !important;
+  margin-bottom: 0.5rem !important;
 }
 
-/* Paragraph spacing */
 .blog-rendered-content p {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.25rem !important;
 }
 
-/* Lists formatting */
-.blog-rendered-content ul,
-.blog-rendered-content ol {
-  margin-left: 1.5rem;
-  margin-bottom: 1.25rem;
+/* Callout / "REAL LIFE" Highlight Cards (Matches Image 2) */
+.blog-rendered-content blockquote,
+.blog-rendered-content div.callout {
+  background-color: #e3ecef !important; /* Soft muted blue-gray card */
+  border-left: none !important;
+  border-radius: 8px !important;
+  padding: 20px 24px !important;
+  margin: 24px 0 !important;
+  color: #2d3748 !important;
+  font-size: 1.05rem !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
-.blog-rendered-content li {
-  margin-bottom: 0.5rem;
-}
-
-/* Embedded Images */
-.blog-rendered-content img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin: 1.5rem 0;
-  display: block;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-/* Blockquotes */
-.blog-rendered-content blockquote {
-  border-left: 4px solid #3b82f6;
-  background-color: #f8fafc;
-  padding: 0.75rem 1rem 0.75rem 1.25rem;
-  margin: 1.5rem 0;
-  font-style: italic;
-  color: #475569;
-  border-radius: 0 6px 6px 0;
-}
-
-/* Inline Code and Code Blocks */
-.blog-rendered-content code {
-  background-color: #f1f5f9;
-  color: #0f172a;
-  font-family: 'Fira Code', 'Courier New', monospace;
-  font-size: 0.9em;
-  padding: 0.2em 0.4em;
-  border-radius: 4px;
-}
-
+/* Code Snippet Dark Theme (Matches Image 3) */
 .blog-rendered-content pre {
-  background-color: #0f172a;
-  color: #f8fafc;
-  padding: 1rem;
-  border-radius: 8px;
-  overflow-x: auto;
-  margin: 1.5rem 0;
+  background-color: #0b131e !important; /* Matches dark hero header */
+  color: #4ade80 !important; /* Clean syntax highlight text */
+  padding: 18px 20px !important;
+  border-radius: 8px !important;
+  font-family: 'Fira Code', 'Courier New', monospace !important;
+  font-size: 0.92rem !important;
+  overflow-x: auto !important;
+  margin: 24px 0 !important;
+  border: 1px solid #1e293b !important;
+}
+
+.blog-rendered-content code {
+  font-family: 'Fira Code', 'Courier New', monospace !important;
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-size: 0.9em !important;
 }
 
 .blog-rendered-content pre code {
-  background-color: transparent;
-  color: inherit;
-  padding: 0;
+  background-color: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+}
+
+/* Footer & Actions Bar */
+.post-card-footer {
+  padding: 16px 28px;
+  background-color: #edf2f7;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
 }

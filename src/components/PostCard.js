@@ -10,7 +10,7 @@ import he from 'he'; // HTML entity decoder
 
 // Required for LaTeX math formula rendering
 import 'katex/dist/katex.min.css';
-import './PostCard.css'; // 👈 Import the scoped typography CSS
+import './PostCard.css'; // 👈 Import the scoped typography & dark hero CSS
 
 function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const navigate = useNavigate();
@@ -103,37 +103,22 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
     : decodedContent;
 
   return (
-    <div className="post-card" style={{ marginBottom: '20px', border: '1px solid #e2e8f0', padding: '20px', borderRadius: '8px', background: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+    <div className="post-card">
       
-      {/* Category Pillar Badge */}
-      <div style={{ marginBottom: '10px' }}>
-        <span style={{ 
-          fontSize: '11px', 
-          fontWeight: 'bold', 
-          textTransform: 'uppercase', 
-          padding: '4px 10px', 
-          borderRadius: '12px',
-          background: theme.bg,
-          color: theme.color,
-          letterSpacing: '0.03em'
-        }}>
-          {theme.label}
-        </span>
-      </div>
+      {/* 1. EDITORIAL DARK HERO HEADER */}
+      <div className="post-card-hero">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
+          {/* Category Pillar Badge */}
+          <span className="pill-category" style={{ background: theme.bg, color: theme.color, padding: '4px 10px', borderRadius: '12px' }}>
+            {theme.label}
+          </span>
 
-      {/* Title */}
-      <h2 style={{ cursor: 'pointer', color: '#1a202c', marginTop: '5px', marginBottom: '12px', fontSize: '1.5rem', fontWeight: '700' }} onClick={() => navigate(`/posts/${post.id}`)}>
-        {post.title}
-      </h2>
-
-      {/* Subcategory Tag List */}
-      {post.tags && post.tags.trim() !== "" && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '15px' }}>
-          {post.tags.split(',').map((tag, idx) => (
+          {/* Subcategory Tags */}
+          {post.tags && post.tags.trim() !== "" && post.tags.split(',').map((tag, idx) => (
             <span key={idx} style={{ 
               fontSize: '11px', 
-              background: '#f1f5f9', 
-              color: '#64748b', 
+              background: 'rgba(255, 255, 255, 0.1)', 
+              color: '#cbd5e1', 
               padding: '2px 8px', 
               borderRadius: '4px',
               fontWeight: '500'
@@ -142,73 +127,96 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
             </span>
           ))}
         </div>
-      )}
-      
-      {/* ⚡ CONTENT WRAPPER WITH TYPOGRAPHY STYLING SCOPE */}
-      <div className="blog-rendered-content">
+
+        {/* Title */}
+        <h2 style={{ cursor: 'pointer' }} onClick={() => navigate(`/posts/${post.id}`)}>
+          {post.title}
+        </h2>
+
+        {/* Hero Meta Bar */}
+        <div className="hero-meta">
+          <span>BY: {post.username || 'UNKNOWN'}</span>
+          <span>👍 {post.likes || 0} LIKES</span>
+          <span>💬 {Array.isArray(post.comments) ? post.comments.length : (post.comments || 0)} COMMENTS</span>
+        </div>
+      </div>
+
+      {/* 2. RENDERED CONTENT BODY (Includes ql-editor scope) */}
+      <div className="blog-rendered-content ql-editor">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeRaw, rehypeKatex]}
         >
           {displayContent}
         </ReactMarkdown>
+
+        {post.live_link && (
+          <p style={{ marginTop: '20px' }}>
+            🔗 <a href={post.live_link} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>Live Project Link</a>
+          </p>
+        )}
       </div>
 
-      {post.live_link && (
-        <p style={{ marginTop: '15px' }}>
-          🔗 <a href={post.live_link} target="_blank" rel="noopener noreferrer" style={{ color: '#007bff', fontWeight: '500', textDecoration: 'none' }}>Live Project Link</a>
-        </p>
-      )}
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '15px', fontSize: '0.9rem', color: '#64748b' }}>
-        <p style={{ margin: 0 }}><strong>By:</strong> {post.username || 'Unknown'}</p>
-        <p style={{ margin: 0 }}>👍 {post.likes || 0} | 💬 {Array.isArray(post.comments) ? post.comments.length : (post.comments || 0)}</p>
-      </div>
-
-      <div className="actions" style={{ display: 'flex', gap: '8px', marginTop: '15px' }}>
-        {isFeedMode ? (
-          <button onClick={() => navigate(`/posts/${post.id}`)} style={{ background: '#007bff', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Read Full Post</button>
-        ) : (
-          <>
-            <button 
-              onClick={handleLike} 
-              disabled={isLiking || !user}
-              style={{ 
-                background: hasLiked ? '#e2e8f0' : '#f1f5f9', 
-                color: hasLiked ? '#1e293b' : '#4a5568', 
-                border: 'none', 
-                padding: '8px 16px', 
-                borderRadius: '4px', 
-                cursor: isLiking || !user ? 'not-allowed' : 'pointer', 
-                fontWeight: '600' 
-              }}
-            >
-              {isLiking ? 'Saving...' : hasLiked ? '❤️ Liked' : '👍 Like'}
+      {/* 3. CARD FOOTER & ACTIONS */}
+      <div className="post-card-footer">
+        <div className="actions">
+          {isFeedMode ? (
+            <button onClick={() => navigate(`/posts/${post.id}`)} style={{ background: '#007bff', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
+              Read Full Post
             </button>
-            <button onClick={() => setShowCommentBox(!showCommentBox)} style={{ background: '#f1f5f9', color: '#4a5568', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Comment</button>
-          </>
-        )}
-        <button onClick={handleShare} style={{ background: '#f1f5f9', color: '#4a5568', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Share</button>
-        {isOwner && (
-          <>
-            <button onClick={() => navigate(`/edit/${post.id}`)} style={{ background: '#fff', color: '#4a5568', border: '1px solid #cbd5e1', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Edit</button>
-            <button onClick={handleDelete} style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Delete</button>
-          </>
-        )}
+          ) : (
+            <>
+              <button 
+                onClick={handleLike} 
+                disabled={isLiking || !user}
+                style={{ 
+                  background: hasLiked ? '#cbd5e1' : '#e2e8f0', 
+                  color: hasLiked ? '#0f172a' : '#334155', 
+                  border: 'none', 
+                  padding: '8px 16px', 
+                  borderRadius: '4px', 
+                  cursor: isLiking || !user ? 'not-allowed' : 'pointer', 
+                  fontWeight: '600' 
+                }}
+              >
+                {isLiking ? 'Saving...' : hasLiked ? '❤️ Liked' : '👍 Like'}
+              </button>
+              <button onClick={() => setShowCommentBox(!showCommentBox)} style={{ background: '#e2e8f0', color: '#334155', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
+                Comment
+              </button>
+            </>
+          )}
+          <button onClick={handleShare} style={{ background: '#e2e8f0', color: '#334155', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
+            Share
+          </button>
+          {isOwner && (
+            <>
+              <button onClick={() => navigate(`/edit/${post.id}`)} style={{ background: '#fff', color: '#334155', border: '1px solid #cbd5e1', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
+                Edit
+              </button>
+              <button onClick={handleDelete} style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
+                Delete
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {showCommentBox && !isFeedMode && (
-        <form onSubmit={handleCommentSubmit} style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
+        <form onSubmit={handleCommentSubmit} style={{ padding: '0 28px 20px 28px', display: 'flex', gap: '8px' }}>
           <input 
             type="text" 
             placeholder="Write a comment..." 
             value={commentText} 
             onChange={(e) => setCommentText(e.target.value)}
-            style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid #ddd' }}
+            style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
           />
-          <button type="submit" style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Post</button>
+          <button type="submit" style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+            Post
+          </button>
         </form>
       )}
+
     </div>
   );
 }
