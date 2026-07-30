@@ -10,12 +10,13 @@ import he from 'he'; // HTML entity decoder
 
 // Required for LaTeX math formula rendering
 import 'katex/dist/katex.min.css';
+import './PostCard.css'; // 👈 Import the scoped typography CSS
 
 function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const navigate = useNavigate();
   const [commentText, setCommentText] = useState('');
   const [showCommentBox, setShowCommentBox] = useState(false);
-  const [isLiking, setIsLiking] = useState(false); // Prevents rapid spam clicking
+  const [isLiking, setIsLiking] = useState(false);
 
   const isOwner = user && String(user.id) === String(post.user_id);
 
@@ -28,12 +29,10 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   };
 
   const theme = categoryTheme[post.category] || categoryTheme.tech;
-
-  // Check if current user has already liked this post.
   const hasLiked = post.liked_by_users?.includes(user?.id);
 
   const handleLike = async () => {
-    if (isLiking || !user) return; // Prevent clicking if request is pending or user is anonymous
+    if (isLiking || !user) return;
     setIsLiking(true);
 
     try {
@@ -46,7 +45,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
     } catch (err) {
       console.error('Like failed:', err);
     } finally {
-      setIsLiking(false); // Re-enable the button once request completes
+      setIsLiking(false);
     }
   };
 
@@ -145,8 +144,8 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
         </div>
       )}
       
-      {/* Content Area with Decoded HTML, Markdown & LaTeX Support */}
-      <div style={{ color: '#4a5568', lineHeight: '1.7', fontSize: '1.05rem' }}>
+      {/* ⚡ CONTENT WRAPPER WITH TYPOGRAPHY STYLING SCOPE */}
+      <div className="blog-rendered-content">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeRaw, rehypeKatex]}

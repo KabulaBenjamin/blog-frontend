@@ -1,3 +1,7 @@
+/* ===================================================
+   1. EXISTING CARD LAYOUT STYLES (Preserved)
+   =================================================== */
+
 .post-card {
   border: 1px solid #ddd;
   border-radius: 12px;
@@ -37,4 +41,107 @@
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 12px;
+}
+
+
+/* ===================================================
+   2. ARTICLE BODY CONTENT TYPOGRAPHY (New Additions)
+   =================================================== */
+
+.blog-rendered-content {
+  font-family: 'Georgia', 'Merriweather', serif;
+  font-size: 1.12rem;
+  line-height: 1.8;
+  color: #2d3748;
+}
+
+/* Headings generated inside content */
+.blog-rendered-content h1 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.blog-rendered-content h2 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.blog-rendered-content h3 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #334155;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Paragraph spacing */
+.blog-rendered-content p {
+  margin-bottom: 1.25rem;
+}
+
+/* Lists formatting */
+.blog-rendered-content ul,
+.blog-rendered-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.blog-rendered-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Embedded Images */
+.blog-rendered-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  display: block;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Blockquotes */
+.blog-rendered-content blockquote {
+  border-left: 4px solid #3b82f6;
+  background-color: #f8fafc;
+  padding: 0.75rem 1rem 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #475569;
+  border-radius: 0 6px 6px 0;
+}
+
+/* Inline Code and Code Blocks */
+.blog-rendered-content code {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 0.9em;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+}
+
+.blog-rendered-content pre {
+  background-color: #0f172a;
+  color: #f8fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.blog-rendered-content pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
 }
