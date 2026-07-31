@@ -112,43 +112,54 @@ function App() {
         return;
       }
 
-      const ws = new WebSocket('wss://blog-2y55.onrender.com/websocket');
-      wsRef.current = ws;
+      try {
+        const ws = new WebSocket('wss://blog-2y55.onrender.com/websocket');
+        wsRef.current = ws;
 
-      ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          switch (message.action) {
-            case 'CREATE':
-              setPosts(prev => [message.post, ...prev]);
-              break;
-            case 'UPDATE':
-              setPosts(prev => prev.map(p => p.id === message.post.id ? message.post : p));
-              break;
-            case 'DELETE':
-              setPosts(prev => prev.filter(p => p.id !== message.id));
-              break;
-            default:
-              break;
+        ws.onopen = () => {
+          console.log('✅ Connected to WebSocket server');
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data);
+            switch (message.action) {
+              case 'CREATE':
+                setPosts(prev => [message.post, ...prev]);
+                break;
+              case 'UPDATE':
+                setPosts(prev => prev.map(p => p.id === message.post.id ? message.post : p));
+                break;
+              case 'DELETE':
+                setPosts(prev => prev.filter(p => p.id !== message.id));
+                break;
+              default:
+                break;
+            }
+          } catch (err) {
+            console.error('WebSocket parsing error:', err);
           }
-        } catch (err) {
-          console.error('WebSocket parsing error:', err);
-        }
-      };
+        };
 
-      ws.onclose = (e) => {
-        wsRef.current = null;
-        console.log(`🔌 WebSocket connection dropped (${e.reason || 'No reason specified'}). Retrying in 5s...`);
-        
-        reconnectTimeout = setTimeout(() => {
-          connectWebSocket();
-        }, 5000);
-      };
+        ws.onclose = (e) => {
+          wsRef.current = null;
+          // Quietly log and space out retry intervals to 15s (gives Render time to wake up)
+          console.warn(`🔌 WebSocket sleeping or disconnected (${e.reason || 'Server cold start'}). Retrying in 15s...`);
+          
+          reconnectTimeout = setTimeout(() => {
+            connectWebSocket();
+          }, 15000);
+        };
 
-      ws.onerror = (error) => {
-        console.error('WebSocket error registered:', error);
-        ws.close();
-      };
+        ws.onerror = () => {
+          // Gracefully let onclose handle the reconnect logic without spamming uncaught errors
+          if (ws.readyState !== WebSocket.CLOSED) {
+            ws.close();
+          }
+        };
+      } catch (err) {
+        console.warn('WebSocket connection attempt failed (backend may be sleeping).');
+      }
     };
 
     connectWebSocket();
@@ -157,6 +168,7 @@ function App() {
       clearTimeout(reconnectTimeout);
       if (wsRef.current) {
         wsRef.current.onclose = null; 
+        wsRef.current.onerror = null;
         wsRef.current.close();
         wsRef.current = null;
       }
