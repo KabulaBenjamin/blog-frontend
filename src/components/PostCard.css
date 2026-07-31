@@ -8,7 +8,7 @@
   border-radius: 12px;
   padding: 0;
   margin-bottom: 28px;
-  background-color: #f7f6f2; /* Warm editorial background from images */
+  background-color: #f7f6f2; /* Warm editorial background */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden;
   font-family: 'Georgia', serif;
@@ -53,7 +53,7 @@
   margin-top: 16px;
 }
 
-/* Content Body */
+/* Content Body Container */
 .blog-rendered-content {
   padding: 28px;
   font-family: 'Georgia', 'Merriweather', serif;
@@ -66,24 +66,28 @@
    SECTION HEADERS, NUMBERS & EYEBROWS ("OPENING", "PART 1")
    =================================================== */
 
-/* Eyebrow Labels (e.g., OPENING, REAL LIFE) */
+/* Eyebrow Labels (e.g. OPENING, REAL LIFE, PART 1, etc.) */
 .blog-rendered-content h3,
 .blog-rendered-content h4,
+.blog-rendered-content.ql-editor h3,
+.blog-rendered-content.ql-editor h4,
 .blog-rendered-content .eyebrow {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  font-size: 0.82rem !important;
-  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  font-weight: 800 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.12em !important;
+  letter-spacing: 0.14em !important;
   color: #8c7355 !important; /* Muted tan/gold editorial accent color */
   margin-top: 2rem !important;
   margin-bottom: 0.5rem !important;
   display: block !important;
 }
 
-/* Large Headings & Section Numbers */
+/* Large Headings & Main Section Titles */
 .blog-rendered-content h1,
-.blog-rendered-content h2 {
+.blog-rendered-content h2,
+.blog-rendered-content.ql-editor h1,
+.blog-rendered-content.ql-editor h2 {
   font-family: 'Georgia', serif !important;
   font-size: 1.85rem !important;
   font-weight: 700 !important;
@@ -93,14 +97,16 @@
   margin-bottom: 0.75rem !important;
 }
 
-/* Body Paragraphs */
-.blog-rendered-content p {
+/* Paragraph Spacing */
+.blog-rendered-content p,
+.blog-rendered-content.ql-editor p {
   margin-bottom: 1.25rem !important;
 }
 
-/* Callout Highlight Cards ("REAL LIFE" Box - Image 2) */
+/* Callout Highlight Cards ("REAL LIFE" Boxes) */
 .blog-rendered-content blockquote,
-.blog-rendered-content div.callout {
+.blog-rendered-content div.callout,
+.blog-rendered-content.ql-editor blockquote {
   background-color: #e3ecef !important; /* Soft muted blue-gray card */
   border-left: none !important;
   border-radius: 8px !important;
@@ -111,8 +117,9 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
-/* Code Snippets Theme (Image 3) */
-.blog-rendered-content pre {
+/* Code Snippets Dark Theme */
+.blog-rendered-content pre,
+.blog-rendered-content.ql-editor pre {
   background-color: #0b131e !important;
   color: #4ade80 !important;
   padding: 18px 20px !important;
@@ -124,7 +131,8 @@
   border: 1px solid #1e293b !important;
 }
 
-.blog-rendered-content code {
+.blog-rendered-content code,
+.blog-rendered-content.ql-editor code {
   font-family: 'Fira Code', 'Courier New', monospace !important;
   background-color: #e2e8f0 !important;
   color: #0f172a !important;
@@ -133,7 +141,8 @@
   font-size: 0.9em !important;
 }
 
-.blog-rendered-content pre code {
+.blog-rendered-content pre code,
+.blog-rendered-content.ql-editor pre code {
   background-color: transparent !important;
   color: inherit !important;
   padding: 0 !important;

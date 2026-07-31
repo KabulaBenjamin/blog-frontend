@@ -10,7 +10,7 @@ import he from 'he'; // HTML entity decoder
 
 // Required for LaTeX math formula rendering
 import 'katex/dist/katex.min.css';
-import './PostCard.css'; // 👈 Import the scoped typography & dark hero CSS
+import './PostCard.css';
 
 function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const navigate = useNavigate();
@@ -28,8 +28,8 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
     faith: { bg: '#fff3e0', color: '#e65100', label: '🌱 Faith' }
   };
 
-  const theme = categoryTheme[post.category] || categoryTheme.tech;
-  const hasLiked = post.liked_by_users?.includes(user?.id);
+  const theme = categoryTheme[post?.category] || categoryTheme.tech;
+  const hasLiked = post?.liked_by_users?.includes(user?.id);
 
   const handleLike = async () => {
     if (isLiking || !user) return;
@@ -94,8 +94,8 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
     }
   };
 
-  // 1. Decode encoded HTML entities (&lt;h1&gt; -> <h1>)
-  const decodedContent = he.decode(post.content || '');
+  // 1. Decode HTML entities (&lt;h1&gt; -> <h1>)
+  const decodedContent = he.decode(post?.content || '');
 
   // 2. Truncate text cleanly for Feed Mode
   const displayContent = isFeedMode && decodedContent.length > 300 
@@ -114,7 +114,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
           </span>
 
           {/* Subcategory Tags */}
-          {post.tags && post.tags.trim() !== "" && post.tags.split(',').map((tag, idx) => (
+          {post?.tags && post.tags.trim() !== "" && post.tags.split(',').map((tag, idx) => (
             <span key={idx} style={{ 
               fontSize: '11px', 
               background: 'rgba(255, 255, 255, 0.1)', 
@@ -130,18 +130,18 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
 
         {/* Title */}
         <h2 style={{ cursor: 'pointer' }} onClick={() => navigate(`/posts/${post.id}`)}>
-          {post.title}
+          {post?.title}
         </h2>
 
         {/* Hero Meta Bar */}
         <div className="hero-meta">
-          <span>BY: {post.username || 'UNKNOWN'}</span>
-          <span>👍 {post.likes || 0} LIKES</span>
-          <span>💬 {Array.isArray(post.comments) ? post.comments.length : (post.comments || 0)} COMMENTS</span>
+          <span>BY: {post?.username || 'UNKNOWN'}</span>
+          <span>👍 {post?.likes || 0} LIKES</span>
+          <span>💬 {Array.isArray(post?.comments) ? post.comments.length : (post?.comments || 0)} COMMENTS</span>
         </div>
       </div>
 
-      {/* 2. RENDERED CONTENT BODY (Includes ql-editor scope) */}
+      {/* 2. RENDERED CONTENT BODY */}
       <div className="blog-rendered-content ql-editor">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
@@ -150,7 +150,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
           {displayContent}
         </ReactMarkdown>
 
-        {post.live_link && (
+        {post?.live_link && (
           <p style={{ marginTop: '20px' }}>
             🔗 <a href={post.live_link} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>Live Project Link</a>
           </p>
