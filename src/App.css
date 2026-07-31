@@ -8,8 +8,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #f4f6f9;
-  color: #2d3748; /* Soft dark gray instead of harsh pure black reduces eye fatigue */
-  line-height: 1.6; /* Comfortable line height spacing for long-form text parsing */
+  color: #2d3748; /* Soft dark gray reduces eye fatigue */
+  line-height: 1.6; /* Comfortable line height spacing for long-form reading */
 }
 
 code {
@@ -29,16 +29,66 @@ h1, h2, h3 {
    ========================================================================= */
 .container {
   width: 100%;
-  max-width: 740px; /* 💡 Ideal reading constraint width (~65-75 characters per line) */
+  max-width: 740px; /* Ideal reading constraint width (~65-75 characters per line) */
   margin: 0 auto;
   box-sizing: border-box;
-  padding: 12px; /* Small layout safety margin padding fallback on narrow mobile fields */
+  padding: 12px; /* Small layout safety margin on narrow mobile screens */
 }
 
 /* 📱 Responsive break scaling for Tablets and larger screens */
 @media (min-width: 600px) {
   .container {
     padding: 24px;
+  }
+}
+
+/* =========================================================================
+   HEADER & BRANDING
+   ========================================================================= */
+.header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 14px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.header-brand h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a202c;
+  letter-spacing: -0.02em;
+}
+
+.header-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.header-brand:hover .header-logo {
+  transform: scale(1.05);
+}
+
+@media (min-width: 600px) {
+  .header-brand h1 {
+    font-size: 1.6rem;
+  }
+  
+  .header-logo {
+    width: 38px;
+    height: 38px;
   }
 }
 
@@ -54,12 +104,12 @@ h1, h2, h3 {
   padding: 16px;
   margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-  word-wrap: break-word; /* Prevents long titles/links from overflowing screens breaking width viewport */
+  word-wrap: break-word; /* Prevents long titles/links from breaking viewport width */
 }
 
 @media (min-width: 600px) {
   .post, .post-card {
-    padding: 24px; /* Gives elements breathing room on wider screens */
+    padding: 24px; /* Breathing room on wider screens */
   }
 }
 
@@ -70,13 +120,13 @@ h1, h2, h3 {
 
 @media (min-width: 600px) {
   .post h3, .post-card h2 {
-    font-size: 1.6rem; /* Automatically increases headings dynamically on desktop views */
+    font-size: 1.6rem; /* Increases headings dynamically on desktop views */
   }
 }
 
-/* Post view typography enhancement for comfortable long-form reading */
+/* Post view typography enhancement for long-form reading */
 .post p, .post-card p {
-  font-size: 1.05rem; /* ~17px minimum rule for mobile readability screens without strain */
+  font-size: 1.05rem; /* ~17px minimum rule for mobile readability without strain */
   line-height: 1.7; /* Generous spacing between paragraphs */
 }
 
@@ -94,13 +144,13 @@ h1, h2, h3 {
 .post-card div img,
 main img {
   max-width: 100% !important; /* Prevents image from exceeding parent width boundaries */
-  height: auto !important;      /* Dynamically scales height proportionally to maintain aspect ratio */
-  display: block;               /* Cleans up block inline-alignment context */
-  margin: 12px auto;            /* Centers image and introduces vertical breathing space */
+  height: auto !important;      /* Maintains aspect ratio dynamically */
+  display: block;               /* Cleans up block inline-alignment */
+  margin: 12px auto;            /* Centers image and introduces vertical breathing room */
   border-radius: 6px;           /* Subtle corner rounding to match card aesthetic */
 }
 
-/* Responsive constraints for video streams, frames, and rich text editor links */
+/* Responsive constraints for video streams, frames, and rich text links */
 .post iframe,
 .post-card iframe,
 .post video,
@@ -118,7 +168,7 @@ main img {
 }
 
 .post-actions button {
-  padding: 8px 14px; /* Scaled touch points target size for mobile tracking fingers (min 44px height standard) */
+  padding: 8px 14px; /* Scaled touch points target size for mobile fingers */
   border: none;
   background: #007bff;
   color: white;
@@ -170,7 +220,7 @@ main img {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-bottom: 70px; /* Safe cushion padding room height above dynamic layout menu tracking navigators */
+  padding-bottom: 70px; /* Safe cushion padding room height above bottom navigation */
   box-sizing: border-box;
 }
 
@@ -200,7 +250,7 @@ footer a:hover {
 }
 
 /* =========================================================================
-   DARK CONTRAST THEME ADJUSTMENTS (Readability verification mode updates)
+   DARK CONTRAST THEME ADJUSTMENTS
    ========================================================================= */
 .dark-theme {
   background-color: #121212;
@@ -211,7 +261,17 @@ footer a:hover {
   color: #ffffff;
 }
 
-.dark-theme header, .dark-theme .quill-editor, .dark-theme input {
+.dark-theme header, 
+.dark-theme .header {
+  background-color: #1e1e1e;
+  border-color: #2d3748;
+}
+
+.dark-theme .header-brand h1 {
+  color: #ffffff;
+}
+
+.dark-theme .quill-editor, .dark-theme input {
   background-color: #1e1e1e;
   color: #ffffff;
   border-color: #2d3748;

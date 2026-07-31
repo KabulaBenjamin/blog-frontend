@@ -5,7 +5,7 @@ import Footer from './components/Footer';
 import Profile from './components/Profile';
 import QuillEditor from './components/QuillEditor';
 import Loader from './components/Loader';
-import BackendLoader from './components/BackendLoader'; // 👈 Imported BackendLoader
+import BackendLoader from './components/BackendLoader'; 
 import ErrorBoundary from './components/ErrorBoundary';
 
 // Global Consent Layer
@@ -159,7 +159,6 @@ function App() {
 
         ws.onclose = (e) => {
           wsRef.current = null;
-          // Quietly log and space out retry intervals to 15s (gives Render time to wake up)
           console.warn(`🔌 WebSocket sleeping or disconnected (${e.reason || 'Server cold start'}). Retrying in 15s...`);
           
           reconnectTimeout = setTimeout(() => {
@@ -168,7 +167,6 @@ function App() {
         };
 
         ws.onerror = () => {
-          // Gracefully let onclose handle the reconnect logic without spamming uncaught errors
           if (ws.readyState !== WebSocket.CLOSED) {
             ws.close();
           }
@@ -194,11 +192,14 @@ function App() {
 
   return (
     <Router>
-      {/* 🛡️ Global App Error Guard Added safely at the root layout boundary */}
       <ErrorBoundary> 
         <div className="App">
+          {/* 🖼️ Updated Header with Brand Logo */}
           <header className="header">
-            <h1>Koikoi Blog</h1>
+            <div className="header-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+              <img src="/icon.png" alt="Koikoi Blog Logo" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
+              <h1 style={{ margin: 0 }}>Koikoi Blog</h1>
+            </div>
           </header>
           
           <main>
