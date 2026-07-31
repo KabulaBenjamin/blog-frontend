@@ -67,26 +67,28 @@ function QuillEditor({ post, user, onSaved }) {
     const quill = quillRef.current.getEditor();
     const range = quill.getSelection(true);
 
-    // Using dangerouslyPasteHTML accurately parses strings into Deltas dynamically
     quill.clipboard.dangerouslyPasteHTML(range.index, rawHtml);
   };
 
-  // Memoized modules configuration to prevent focus drops during active key input states
+  // Insert standard horizontal rule (<hr>) into Quill
+  const insertDivider = () => {
+    const quill = quillRef.current.getEditor();
+    const range = quill.getSelection(true);
+    quill.clipboard.dangerouslyPasteHTML(range.index, '<hr><p><br></p>');
+  };
+
+  // Memoized modules configuration
   const modules = useMemo(() => ({
-    // 🛠️ RELAXED CLIPBOARD CONFIGURATION TO ALLOW COMPLEX HTML/DIVS
     clipboard: {
-      matchVisual: false, // Stop Quill from aggressively re-calculating visual layouts
+      matchVisual: false,
       matchers: [
-        // Ensure complex standard DIV wrappers are preserved instead of stripped
-        ['DIV', (node, delta) => {
-          return delta;
-        }]
+        ['DIV', (node, delta) => delta]
       ]
     },
     toolbar: {
       container: [
         [{ 'font': ['serif', 'monospace', 'sans-serif', 'times-new-roman', 'arial', 'georgia'] }],
-        [{ 'header': [1, 2, false] }],
+        [{ 'header': [1, 2, 3, 4, false] }], // Enabled H3/H4 for Eyebrows
         ['bold', 'italic', 'underline'],
         ['link', 'image'],
         [{ 'list': 'ordered'}, { 'list': 'bullet' }],
@@ -104,15 +106,12 @@ function QuillEditor({ post, user, onSaved }) {
             if (!file) return;
 
             try {
-              // 1. Compress the raw user file in client-side memory
               const optimizedFile = await compressImage(file);
 
-              // 2. Construct multi-part body for direct Cloudinary ingestion
               const formData = new FormData();
               formData.append('file', optimizedFile);
               formData.append('upload_preset', 'ml_default'); 
 
-              // 3. Transmit directly to Cloudinary pipeline using your verified Cloud Name
               const res = await fetch('https://api.cloudinary.com/v1_1/sy3yp1q8/image/upload', {
                 method: 'POST',
                 body: formData
@@ -123,7 +122,6 @@ function QuillEditor({ post, user, onSaved }) {
                 const quill = quillRef.current.getEditor();
                 const range = quill.getSelection(true); 
                 
-                // Extract clean, highly performant CDN link
                 const completeImageUrl = data.secure_url;
 
                 quill.insertEmbed(range.index, 'image', completeImageUrl);
@@ -149,7 +147,6 @@ function QuillEditor({ post, user, onSaved }) {
       return;
     }
 
-    // Clean, lowercase, and slugify tag tokens (e.g. "Web Dev" -> "web-dev")
     const cleanTags = tags
       .toLowerCase()
       .split(',')
@@ -158,7 +155,6 @@ function QuillEditor({ post, user, onSaved }) {
       .join(', ');
 
     try {
-      // 🛠️ Construct payload
       const postData = {
         title: title,
         content: content || '',
@@ -178,7 +174,6 @@ function QuillEditor({ post, user, onSaved }) {
         postData.user_id = user.id;
       }
 
-      // ⚡ Transmit payload with accurate serialization headers and cookies included
       const res = await fetch(url, { 
         method, 
         headers: {
@@ -202,8 +197,10 @@ function QuillEditor({ post, user, onSaved }) {
 
   return (
     <div className="quill-editor">
-      {/* Dynamic CSS Styling Injector for Font Mappings */}
+      {/* Dynamic CSS Styling Injector for Fonts & Editorial Theme */}
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap');
+
         .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="times-new-roman"]::before,
         .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="times-new-roman"]::before {
           content: 'Times New Roman';
@@ -220,14 +217,75 @@ function QuillEditor({ post, user, onSaved }) {
           font-family: Georgia, serif;
         }
 
-        /* Set the actual inline runtime fonts inside the text area container */
         .ql-font-times-new-roman { font-family: 'Times New Roman', Times, serif; }
         .ql-font-arial { font-family: Arial, sans-serif; }
         .ql-font-georgia { font-family: Georgia, serif; }
 
+        /* ===================================================
+           EDITORIAL STYLES INSIDE THE QUILL EDITOR
+           =================================================== */
+        .ql-editor {
+          font-family: 'Source Serif 4', Georgia, serif;
+          font-size: 1.1rem;
+          line-height: 1.8;
+          min-height: 350px;
+          background-color: #f7f6f2;
+        }
+
+        /* 1. H3/H4: Olive Gold Eyebrows */
+        .ql-editor h3,
+        .ql-editor h4 {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.78rem !important;
+          font-weight: 800 !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.22em !important;
+          color: #937b51 !important;
+          margin-top: 1.5rem !important;
+          margin-bottom: 0.5rem !important;
+        }
+
+        /* 2. H1/H2: Serif Editorial Titles */
+        .ql-editor h1,
+        .ql-editor h2 {
+          font-family: 'Playfair Display', serif !important;
+          font-weight: 700 !important;
+          color: #1a202c !important;
+          margin-top: 0.5rem !important;
+          margin-bottom: 1rem !important;
+        }
+
+        /* 3. Section Divider: 3 Circles (○ ○ ○) */
+        .ql-editor hr {
+          border: none !important;
+          text-align: center !important;
+          margin: 3rem 0 2rem 0 !important;
+          height: auto !important;
+          overflow: visible !important;
+          background: transparent !important;
+        }
+
+        .ql-editor hr::after {
+          content: "○    ○    ○" !important;
+          font-size: 1.35rem !important;
+          color: #3b7a66 !important;
+          letter-spacing: 1.5rem !important;
+          padding-left: 1.5rem !important;
+          display: inline-block !important;
+          font-family: sans-serif !important;
+          opacity: 0.85;
+        }
+
+        .editor-action-bar {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          margin: 10px 0;
+        }
+
         .html-paste-btn {
           background: #333; color: #fff; border: none; padding: 6px 12px;
-          margin-bottom: 8px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
+          border-radius: 4px; cursor: pointer; font-size: 0.85rem;
         }
         .html-paste-btn:hover { background: #555; }
       `}</style>
@@ -271,7 +329,10 @@ function QuillEditor({ post, user, onSaved }) {
         />
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
+      <div className="editor-action-bar">
+        <button type="button" className="html-paste-btn" onClick={insertDivider}>
+          ⭕ Insert Section Divider (○ ○ ○)
+        </button>
         <button type="button" className="html-paste-btn" onClick={pasteRawHtmlDirectly}>
           📋 Paste Raw HTML Snippet
         </button>

@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import Profile from './components/Profile';
 import QuillEditor from './components/QuillEditor';
 import Loader from './components/Loader';
+import BackendLoader from './components/BackendLoader'; // 👈 Imported BackendLoader
 import ErrorBoundary from './components/ErrorBoundary';
 
 // Global Consent Layer
@@ -59,6 +60,10 @@ function App() {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
   
+  // ⏳ New initial loading states for cold starts
+  const [loading, setLoading] = useState(true);
+  const [isColdStart, setIsColdStart] = useState(false);
+
   // Persistent reference to track a singular active WebSocket instance across re-renders
   const wsRef = useRef(null);
 
@@ -89,13 +94,24 @@ function App() {
   };
 
   useEffect(() => {
+    // ⏲️ If backend fetch takes more than 3.5s, trigger the cold start wake-up state
+    const coldStartTimer = setTimeout(() => {
+      setIsColdStart(true);
+    }, 3500);
+
     // 1. Initial HTTP Fetch for Core Posts Feed
     fetch('https://blog-2y55.onrender.com/posts')
       .then(res => res.json())
-      .then(data => setPosts(Array.isArray(data) ? data : []))
+      .then(data => {
+        clearTimeout(coldStartTimer);
+        setPosts(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
       .catch(err => {
+        clearTimeout(coldStartTimer);
         console.error('Initial feed load failure:', err);
         setPosts([]);
+        setLoading(false);
       });
 
     // 2. Local Authentication Hydration
@@ -165,6 +181,7 @@ function App() {
     connectWebSocket();
 
     return () => {
+      clearTimeout(coldStartTimer);
       clearTimeout(reconnectTimeout);
       if (wsRef.current) {
         wsRef.current.onclose = null; 
@@ -185,88 +202,93 @@ function App() {
           </header>
           
           <main>
-            <Routes>
-              {/* Core Feed Route */}
-              <Route path="/" element={<Home user={user} />} />
+            {/* 🌟 Handle cold starts and initial fetch smoothly */}
+            {loading ? (
+              <BackendLoader isColdStart={isColdStart} />
+            ) : (
+              <Routes>
+                {/* Core Feed Route */}
+                <Route path="/" element={<Home user={user} posts={posts} />} />
 
-              {/* 📝 Dedicated Single Post Details View Route */}
-              <Route path="/posts/:id" element={<PostDetail user={user} />} />
+                {/* 📝 Dedicated Single Post Details View Route */}
+                <Route path="/posts/:id" element={<PostDetail user={user} />} />
 
-              {/* 📊 Publisher Analytics Workstation Dashboard Route */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  user ? (
-                    <Dashboard user={user} />
-                  ) : (
-                    <Navigate to="/signin" replace />
-                  )
-                } 
-              />
+                {/* 📊 Publisher Analytics Workstation Dashboard Route */}
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    user ? (
+                      <Dashboard user={user} />
+                    ) : (
+                      <Navigate to="/signin" replace />
+                    )
+                  } 
+                />
 
-              {/* 👑 Superuser Control Dashboard Route (Protected) */}
-              <Route 
-                path="/admin" 
-                element={
-                  user && (user.username === 'Blog_Admin' || user.role === 'admin') ? (
-                    <AdminDashboard user={user} />
-                  ) : (
-                    <Navigate to="/" replace />
-                  )
-                } 
-              />
+                {/* 👑 Superuser Control Dashboard Route (Protected) */}
+                <Route 
+                  path="/admin" 
+                  element={
+                    user && (user.username === 'Blog_Admin' || user.role === 'admin') ? (
+                      <AdminDashboard user={user} />
+                    ) : (
+                      <Navigate to="/" replace />
+                    )
+                  } 
+                />
 
-              {/* Application Feature Routes */}
-              <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
-              <Route path="/notifications" element={<Notifications user={user} />} />
-              
-              {/* 🛠️ UPDATED: Added target hooks to handle Identity Updates and State synchronization */}
-              <Route 
-                path="/settings" 
-                element={
-                  <Settings 
-                    user={user} 
-                    onLogoutSuccess={handleLogoutSuccess} 
-                    onSignedIn={setUser} 
-                  />
-                } 
-              />
-              
-              {/* High-Efficiency Search matching structural prop criteria */}
-              <Route 
-                path="/search" 
-                element={
-                  <Search 
-                    user={user} 
-                    onUpdated={handleUpdated} 
-                    onDeleted={handleDeleted} 
-                  />
-                } 
-              />
-              
-              {/* Editor Content Pipelines (Protected Route Enforced below) */}
-              <Route 
-                path="/new" 
-                element={
-                  user ? (
-                    <QuillEditor user={user} onSaved={handleSaved} />
-                  ) : (
-                    <Navigate to="/signin" replace />
-                  )
-                } 
-              />
-              <Route path="/edit/:id" element={<EditWrapper user={user} onSaved={handleSaved} />} />
+                {/* Application Feature Routes */}
+                <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
+                <Route path="/notifications" element={<Notifications user={user} />} />
+                
+                {/* 🛠️ UPDATED: Added target hooks to handle Identity Updates and State synchronization */}
+                <Route 
+                  path="/settings" 
+                  element={
+                    <Settings 
+                      user={user} 
+                      onLogoutSuccess={handleLogoutSuccess} 
+                      onSignedIn={setUser} 
+                    />
+                  } 
+                />
+                
+                {/* High-Efficiency Search matching structural prop criteria */}
+                <Route 
+                  path="/search" 
+                  element={
+                    <Search 
+                      user={user} 
+                      onUpdated={handleUpdated} 
+                      onDeleted={handleDeleted} 
+                    />
+                  } 
+                />
+                
+                {/* Editor Content Pipelines (Protected Route Enforced below) */}
+                <Route 
+                  path="/new" 
+                  element={
+                    user ? (
+                      <QuillEditor user={user} onSaved={handleSaved} />
+                    ) : (
+                      <Navigate to="/signin" replace />
+                    )
+                  } 
+                />
+                <Route path="/edit/:id" element={<EditWrapper user={user} onSaved={handleSaved} />} />
 
-              {/* Authentication Nodes — Aligned to look for custom handler hooks */}
-              <Route path="/signin" element={<Signin onSignedIn={setUser} />} />
-              <Route path="/signup" element={<Signup onSignedUp={setUser} />} />
+                {/* Authentication Nodes — Aligned to look for custom handler hooks */}
+                <Route path="/signin" element={<Signin onSignedIn={setUser} />} />
+                <Route path="/signup" element={<Signup onSignedUp={setUser} />} />
 
-              {/* Static Legal Disclosures & App Context Pages */}
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-            </Routes>
+                {/* Static Legal Disclosures & App Context Pages */}
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+              </Routes>
+            )}
           </main>
           
           {/* Navigational Anchors */}
