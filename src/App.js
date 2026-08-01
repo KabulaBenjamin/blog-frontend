@@ -194,11 +194,20 @@ function App() {
     <Router>
       <ErrorBoundary> 
         <div className="App">
-          {/* 🖼️ Updated Header with Brand Logo */}
+          {/* 🖼️ Header with dynamic branding logo integration */}
           <header className="header">
-            <div className="header-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-              <img src="/icon.png" alt="Koikoi Blog Logo" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
-              <h1 style={{ margin: 0 }}>Koikoi Blog</h1>
+            <div className="header-brand">
+              <img 
+                src={(process.env.PUBLIC_URL || '') + '/logo.png'} 
+                alt="Koikoi Blog Logo" 
+                className="header-logo"
+                onError={(e) => {
+                  // Fallback safely if user named it icon.png instead
+                  e.target.onerror = null;
+                  e.target.src = '/icon.png';
+                }}
+              />
+              <h1>Koikoi Blog</h1>
             </div>
           </header>
           
@@ -242,7 +251,7 @@ function App() {
                 <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
                 <Route path="/notifications" element={<Notifications user={user} />} />
                 
-                {/* 🛠️ UPDATED: Added target hooks to handle Identity Updates and State synchronization */}
+                {/* 🛠️ Identity Updates and State synchronization */}
                 <Route 
                   path="/settings" 
                   element={
@@ -266,7 +275,7 @@ function App() {
                   } 
                 />
                 
-                {/* Editor Content Pipelines (Protected Route Enforced below) */}
+                {/* Editor Content Pipelines */}
                 <Route 
                   path="/new" 
                   element={
@@ -279,7 +288,7 @@ function App() {
                 />
                 <Route path="/edit/:id" element={<EditWrapper user={user} onSaved={handleSaved} />} />
 
-                {/* Authentication Nodes — Aligned to look for custom handler hooks */}
+                {/* Authentication Nodes */}
                 <Route path="/signin" element={<Signin onSignedIn={setUser} />} />
                 <Route path="/signup" element={<Signup onSignedUp={setUser} />} />
 
