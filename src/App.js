@@ -1,5 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './App.css';
+
+// 🎨 Import logo directly so Webpack bundles it cleanly
+import logo from './logo.png';
+
 import BottomNav from './components/BottomNav';
 import Footer from './components/Footer';
 import Profile from './components/Profile';
@@ -194,18 +198,13 @@ function App() {
     <Router>
       <ErrorBoundary> 
         <div className="App">
-          {/* 🖼️ Header with dynamic branding logo integration */}
+          {/* 🖼️ Clean, imported logo in header */}
           <header className="header">
             <div className="header-brand">
               <img 
-                src={(process.env.PUBLIC_URL || '') + '/logo.png'} 
+                src={logo} 
                 alt="Koikoi Blog Logo" 
-                className="header-logo"
-                onError={(e) => {
-                  // Fallback safely if user named it icon.png instead
-                  e.target.onerror = null;
-                  e.target.src = '/icon.png';
-                }}
+                className="header-logo" 
               />
               <h1>Koikoi Blog</h1>
             </div>
