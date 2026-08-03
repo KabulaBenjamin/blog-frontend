@@ -102,6 +102,8 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
     ? decodedContent.substring(0, 300) + '...' 
     : decodedContent;
 
+  const commentsCount = Array.isArray(post?.comments) ? post.comments.length : (post?.comments || 0);
+
   return (
     <div className="post-card">
       
@@ -137,7 +139,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
         <div className="hero-meta">
           <span>BY: {post?.username || 'UNKNOWN'}</span>
           <span>👍 {post?.likes || 0} LIKES</span>
-          <span>💬 {Array.isArray(post?.comments) ? post.comments.length : (post?.comments || 0)} COMMENTS</span>
+          <span>💬 {commentsCount} COMMENTS</span>
         </div>
       </div>
 

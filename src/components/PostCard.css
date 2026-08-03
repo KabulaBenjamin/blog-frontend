@@ -1,69 +1,77 @@
-/* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap');
 
 /* Core Post Container */
 .post-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid #1e293b;
   border-radius: 12px;
   padding: 0;
   margin-bottom: 28px;
-  background-color: #f7f6f2; /* Warm editorial background */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: #0f0f11;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   overflow: hidden;
   font-family: 'Source Serif 4', 'Georgia', serif;
 }
 
 /* Dark Hero Banner */
 .post-card-hero {
-  background-color: #0b131e;
+  background-color: #0f0f11;
   color: #f8fafc;
-  padding: 32px 28px;
+  padding: 40px 32px 28px 32px;
   border-bottom: 1px solid #1e293b;
 }
 
-.post-card-hero .pill-category {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.post-card-hero h2 {
+.post-card-hero .hero-title {
   font-family: 'Playfair Display', 'Georgia', serif;
-  font-size: 2.2rem;
+  font-size: 2.8rem;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.12;
   color: #ffffff;
-  margin: 12px 0 16px 0;
+  margin: 0 0 16px 0;
+  cursor: pointer;
+  letter-spacing: -0.01em;
 }
 
-.post-card-hero .hero-meta {
-  display: flex;
-  gap: 20px;
+.post-card-hero .hero-description {
+  font-family: 'Source Serif 4', 'Georgia', serif;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin-bottom: 28px;
+}
+
+/* Single-Row Horizontal Metadata */
+.hero-meta-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 24px !important;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 11px;
+  font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #94a3b8;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 16px;
-  margin-top: 16px;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  padding-top: 8px;
+}
+
+.hero-meta-row span {
+  display: inline-block;
+  white-space: nowrap;
 }
 
 /* Article Content Body */
 .blog-rendered-content {
-  padding: 28px;
+  padding: 32px;
   font-family: 'Source Serif 4', 'Georgia', serif;
   font-size: 1.12rem;
   line-height: 1.85;
-  color: #2d3748;
+  color: #e2e8f0;
+  background-color: #0f0f11;
 }
 
 /* ===================================================
    1. SECTION DIVIDER (THE 3 HOLLOW CIRCLES "○ ○ ○")
-   Triggers when using `---` in Markdown
    =================================================== */
 
 .blog-rendered-content hr,
@@ -80,16 +88,16 @@
 .blog-rendered-content.ql-editor hr::after {
   content: "○    ○    ○" !important;
   font-size: 1.35rem !important;
-  color: #3b7a66 !important; /* Sage green / teal circle outline color */
+  color: #3b7a66 !important;
   letter-spacing: 1.5rem !important;
-  padding-left: 1.5rem !important; /* Center alignment balance */
+  padding-left: 1.5rem !important;
   display: inline-block !important;
   font-family: sans-serif !important;
   opacity: 0.85;
 }
 
 /* ===================================================
-   2. SECTION EYEBROW HEADERS ("PART 3 — FOR THE COMPLETE BEGINNER")
+   2. SECTION EYEBROW HEADERS
    =================================================== */
 
 .blog-rendered-content h3,
@@ -101,14 +109,13 @@
   font-size: 0.78rem !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.22em !important; /* Wide letter spacing from image */
-  color: #937b51 !important; /* Muted olive gold accent color */
+  letter-spacing: 0.22em !important;
+  color: #937b51 !important;
   margin-top: 1.5rem !important;
   margin-bottom: 0.6rem !important;
   display: block !important;
 }
 
-/* Main Section Heading ("The foundations, in the order that actually works") */
 .blog-rendered-content h1,
 .blog-rendered-content h2,
 .blog-rendered-content.ql-editor h1,
@@ -116,13 +123,12 @@
   font-family: 'Playfair Display', serif !important;
   font-size: 2rem !important;
   font-weight: 700 !important;
-  color: #1a202c !important;
+  color: #ffffff !important;
   line-height: 1.28 !important;
   margin-top: 0.5rem !important;
   margin-bottom: 1.25rem !important;
 }
 
-/* Body Paragraphs */
 .blog-rendered-content p,
 .blog-rendered-content.ql-editor p {
   margin-bottom: 1.35rem !important;
@@ -132,12 +138,12 @@
 .blog-rendered-content blockquote,
 .blog-rendered-content div.callout,
 .blog-rendered-content.ql-editor blockquote {
-  background-color: #e2eaed !important;
-  border-left: 3px solid #0b131e !important;
+  background-color: #1e293b !important;
+  border-left: 3px solid #38bdf8 !important;
   border-radius: 6px !important;
   padding: 20px 24px !important;
   margin: 24px 0 !important;
-  color: #1e293b !important;
+  color: #f1f5f9 !important;
   font-size: 1.05rem !important;
 }
 
@@ -158,8 +164,8 @@
 .blog-rendered-content code,
 .blog-rendered-content.ql-editor code {
   font-family: 'Fira Code', 'Courier New', monospace !important;
-  background-color: #e2e8f0 !important;
-  color: #0f172a !important;
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
   padding: 2px 6px !important;
   border-radius: 4px !important;
   font-size: 0.9em !important;
@@ -174,9 +180,9 @@
 
 /* Footer & Actions Bar */
 .post-card-footer {
-  padding: 16px 28px;
-  background-color: #edf2f7;
-  border-top: 1px solid #e2e8f0;
+  padding: 16px 32px;
+  background-color: #0b131e;
+  border-top: 1px solid #1e293b;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -185,4 +191,66 @@
 .actions {
   display: flex;
   gap: 10px;
+}
+
+/* Helper Action Buttons */
+.btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  background: #1e293b;
+  color: #cbd5e1;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-secondary.liked {
+  background: #334155;
+  color: #ffffff;
+}
+
+.btn-outline {
+  background: transparent;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.comment-form {
+  padding: 0 32px 24px 32px;
+  background-color: #0b131e;
+  display: flex;
+  gap: 12px;
+}
+
+.comment-form input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #ffffff;
 }

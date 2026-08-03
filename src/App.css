@@ -250,7 +250,7 @@ footer a:hover {
 }
 
 /* =========================================================================
-   DARK CONTRAST THEME ADJUSTMENTS
+   DARK CONTRAST THEME & HERO ARTICLE LAYOUT (FRAME 1 MATCH)
    ========================================================================= */
 .dark-theme {
   background-color: #121212;
@@ -286,4 +286,53 @@ footer a:hover {
   background: #1a1a1a;
   border-color: #2d3748;
   color: #a0aec0;
+}
+
+/* Frame 1 Hero Card & Typography Overrides */
+.hero-card,
+.dark-theme .hero-card {
+  background-color: #0f0f11;
+  color: #f0f0f0;
+  padding: 40px 32px;
+  border: none;
+}
+
+.hero-title {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #ffffff;
+  margin-top: 0;
+  margin-bottom: 24px;
+  letter-spacing: -0.01em;
+}
+
+.hero-description {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin-bottom: 32px;
+}
+
+/* Metadata Row (Aligns items horizontally in a single row) */
+.post-metadata,
+.hero-metadata {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  margin-top: 24px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.post-metadata span,
+.hero-metadata span {
+  display: inline-flex;
+  align-items: center;
 }
