@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Koikoi Blog</string>
+    <string name="title_activity_main">Koikoi Blog</string>
+    <string name="package_name">com.koikoiblog.app</string>
+    <string name="custom_url_scheme">com.koikoiblog.app</string>
+</resources>
