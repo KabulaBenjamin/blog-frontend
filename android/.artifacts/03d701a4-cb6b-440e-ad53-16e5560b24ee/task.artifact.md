@@ -1,0 +1,5 @@
+- `[x]` Configure `logo.png` as app icon in `AndroidManifest.xml`
+- `[x]` Add network permissions and security config to Android
+- `[x]` Align App ID and enable Capacitor HTTP in `capacitor.config.ts`
+- `[x]` Implement update notification logic in `App.js`
+- `[/]` Deploy and verify

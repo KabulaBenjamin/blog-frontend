@@ -97,6 +97,21 @@ function App() {
     window.location.href = '/';
   };
 
+  const APP_VERSION = '0.1.0';
+
+  const checkUpdates = async () => {
+    try {
+      // Fetches version from backend. Backend should return { "version": "0.1.1" }
+      const res = await fetch('https://blog-2y55.onrender.com/app-version');
+      const data = await res.json();
+      if (data.version && data.version !== APP_VERSION) {
+        alert(`🚀 New update available (v${data.version})! Please refresh or restart the app.`);
+      }
+    } catch (err) {
+      console.warn('Update check failed:', err);
+    }
+  };
+
   useEffect(() => {
     // ⏲️ If backend fetch takes more than 3.5s, trigger the cold start wake-up state
     const coldStartTimer = setTimeout(() => {
@@ -118,7 +133,10 @@ function App() {
         setLoading(false);
       });
 
-    // 2. Local Authentication Hydration
+    // 2. Check for app updates
+    checkUpdates();
+
+    // 3. Local Authentication Hydration
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
