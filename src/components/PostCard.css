@@ -2,22 +2,23 @@
 
 /* Core Post Container */
 .post-card {
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 12px;
   padding: 0;
   margin-bottom: 28px;
-  background-color: #0f0f11;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  background-color: var(--card-bg, #ffffff);
+  box-shadow: 0 4px 16px var(--shadow-color, rgba(0, 0, 0, 0.05));
   overflow: hidden;
   font-family: 'Source Serif 4', 'Georgia', serif;
+  color: var(--text-color, #0f172a);
 }
 
-/* Dark Hero Banner */
+/* Hero Banner Header */
 .post-card-hero {
-  background-color: #0f0f11;
-  color: #f8fafc;
+  background-color: var(--hero-bg, #f8fafc);
+  color: var(--text-color, #0f172a);
   padding: 40px 32px 28px 32px;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
 }
 
 .post-card-hero h2,
@@ -26,7 +27,7 @@
   font-size: 2.8rem;
   font-weight: 700;
   line-height: 1.12;
-  color: #ffffff;
+  color: var(--heading-color, #0f172a);
   margin: 0 0 16px 0;
   cursor: pointer;
   letter-spacing: -0.01em;
@@ -36,11 +37,11 @@
   font-family: 'Source Serif 4', 'Georgia', serif;
   font-size: 1.15rem;
   line-height: 1.6;
-  color: #94a3b8;
+  color: var(--muted-color, #64748b);
   margin-bottom: 28px;
 }
 
-/* Single-Row Horizontal Metadata */
+/* Metadata Row */
 .hero-meta,
 .hero-meta-row {
   display: flex !important;
@@ -53,7 +54,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #64748b;
+  color: var(--muted-color, #64748b);
   padding-top: 8px;
 }
 
@@ -69,14 +70,11 @@
   font-family: 'Source Serif 4', 'Georgia', serif;
   font-size: 1.12rem;
   line-height: 1.85;
-  color: #e2e8f0;
-  background-color: #0f0f11;
+  color: var(--text-color, #1e293b);
+  background-color: var(--card-bg, #ffffff);
 }
 
-/* ===================================================
-   1. SECTION DIVIDER (THE 3 HOLLOW CIRCLES "○ ○ ○")
-   =================================================== */
-
+/* Section Divider */
 .blog-rendered-content hr,
 .blog-rendered-content.ql-editor hr {
   border: none !important;
@@ -91,7 +89,7 @@
 .blog-rendered-content.ql-editor hr::after {
   content: "○    ○    ○" !important;
   font-size: 1.35rem !important;
-  color: #3b7a66 !important;
+  color: var(--accent-divider, #3b7a66) !important;
   letter-spacing: 1.5rem !important;
   padding-left: 1.5rem !important;
   display: inline-block !important;
@@ -99,10 +97,7 @@
   opacity: 0.85;
 }
 
-/* ===================================================
-   2. SECTION EYEBROW HEADERS
-   =================================================== */
-
+/* Section Eyebrow Headers */
 .blog-rendered-content h3,
 .blog-rendered-content h4,
 .blog-rendered-content.ql-editor h3,
@@ -113,7 +108,7 @@
   font-weight: 800 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.22em !important;
-  color: #937b51 !important;
+  color: var(--eyebrow-color, #937b51) !important;
   margin-top: 1.5rem !important;
   margin-bottom: 0.6rem !important;
   display: block !important;
@@ -126,7 +121,7 @@
   font-family: 'Playfair Display', serif !important;
   font-size: 2rem !important;
   font-weight: 700 !important;
-  color: #ffffff !important;
+  color: var(--heading-color, #0f172a) !important;
   line-height: 1.28 !important;
   margin-top: 0.5rem !important;
   margin-bottom: 1.25rem !important;
@@ -135,40 +130,41 @@
 .blog-rendered-content p,
 .blog-rendered-content.ql-editor p {
   margin-bottom: 1.35rem !important;
+  color: var(--text-color, #1e293b);
 }
 
 /* Callout Highlight Box */
 .blog-rendered-content blockquote,
 .blog-rendered-content div.callout,
 .blog-rendered-content.ql-editor blockquote {
-  background-color: #1e293b !important;
-  border-left: 3px solid #38bdf8 !important;
+  background-color: var(--callout-bg, #f8fafc) !important;
+  border-left: 3px solid var(--accent-color, #38bdf8) !important;
   border-radius: 6px !important;
   padding: 20px 24px !important;
   margin: 24px 0 !important;
-  color: #f1f5f9 !important;
+  color: var(--text-color, #0f172a) !important;
   font-size: 1.05rem !important;
 }
 
 /* Code Block Styling */
 .blog-rendered-content pre,
 .blog-rendered-content.ql-editor pre {
-  background-color: #0b131e !important;
-  color: #4ade80 !important;
+  background-color: var(--code-bg, #0f172a) !important;
+  color: var(--code-color, #4ade80) !important;
   padding: 18px 20px !important;
   border-radius: 8px !important;
   font-family: 'Fira Code', 'Courier New', monospace !important;
   font-size: 0.92rem !important;
   overflow-x: auto !important;
   margin: 24px 0 !important;
-  border: 1px solid #1e293b !important;
+  border: 1px solid var(--border-color, #334155) !important;
 }
 
 .blog-rendered-content code,
 .blog-rendered-content.ql-editor code {
   font-family: 'Fira Code', 'Courier New', monospace !important;
-  background-color: #1e293b !important;
-  color: #f8fafc !important;
+  background-color: var(--inline-code-bg, #f1f5f9) !important;
+  color: var(--inline-code-color, #0f172a) !important;
   padding: 2px 6px !important;
   border-radius: 4px !important;
   font-size: 0.9em !important;
@@ -184,8 +180,8 @@
 /* Footer & Actions Bar */
 .post-card-footer {
   padding: 16px 32px;
-  background-color: #0b131e;
-  border-top: 1px solid #1e293b;
+  background-color: var(--footer-bg, #f8fafc);
+  border-top: 1px solid var(--border-color, #e2e8f0);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -198,8 +194,8 @@
 
 /* Helper Action Buttons */
 .btn-primary {
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--btn-primary-bg, #2563eb);
+  color: var(--btn-primary-text, #ffffff);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -208,8 +204,8 @@
 }
 
 .btn-secondary {
-  background: #1e293b;
-  color: #cbd5e1;
+  background: var(--btn-secondary-bg, #e2e8f0);
+  color: var(--btn-secondary-text, #334155);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -218,14 +214,14 @@
 }
 
 .btn-secondary.liked {
-  background: #334155;
-  color: #ffffff;
+  background: var(--btn-liked-bg, #cbd5e1);
+  color: var(--btn-liked-text, #0f172a);
 }
 
 .btn-outline {
   background: transparent;
-  color: #cbd5e1;
-  border: 1px solid #334155;
+  color: var(--text-color, #334155);
+  border: 1px solid var(--border-color, #cbd5e1);
   padding: 8px 16px;
   border-radius: 6px;
   cursor: pointer;
@@ -233,8 +229,8 @@
 }
 
 .btn-danger {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  background: var(--btn-danger-bg, #fee2e2);
+  color: var(--btn-danger-text, #ef4444);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -244,7 +240,7 @@
 
 .comment-form {
   padding: 0 32px 24px 32px;
-  background-color: #0b131e;
+  background-color: var(--footer-bg, #f8fafc);
   display: flex;
   gap: 12px;
 }
@@ -253,15 +249,12 @@
   flex: 1;
   padding: 10px 14px;
   border-radius: 6px;
-  border: 1px solid #334155;
-  background: #1e293b;
-  color: #ffffff;
+  border: 1px solid var(--border-color, #cbd5e1);
+  background: var(--input-bg, #ffffff);
+  color: var(--text-color, #0f172a);
 }
 
-/* ===================================================
-   3. DYNAMIC HTML CALLOUT BOXES & TABLES
-   =================================================== */
-
+/* Dynamic Callout Boxes & Tables */
 .blog-rendered-content .box {
   padding: 1.25rem 1.5rem !important;
   border-radius: 8px !important;
@@ -271,24 +264,24 @@
 
 /* Life / Tip Callout Box */
 .blog-rendered-content .box.life {
-  background-color: #fef9e7 !important;
-  border-color: #f7e1a0 !important;
-  color: #7d5a18 !important;
+  background-color: var(--box-life-bg, #fef9e7) !important;
+  border-color: var(--box-life-border, #f7e1a0) !important;
+  color: var(--box-life-text, #7d5a18) !important;
 }
 
 .blog-rendered-content .box.life p {
-  color: #7d5a18 !important;
+  color: var(--box-life-text, #7d5a18) !important;
 }
 
 /* Definition Callout Box */
 .blog-rendered-content .box.definition {
-  background-color: #1e1b4b !important;
-  border-color: #4338ca !important;
-  color: #e0e7ff !important;
+  background-color: var(--box-def-bg, #f1f5f9) !important;
+  border-color: var(--box-def-border, #cbd5e1) !important;
+  color: var(--box-def-text, #1e293b) !important;
 }
 
 .blog-rendered-content .box.definition p {
-  color: #e0e7ff !important;
+  color: var(--box-def-text, #1e293b) !important;
 }
 
 .blog-rendered-content .box-title {
@@ -309,11 +302,11 @@
 .blog-rendered-content th,
 .blog-rendered-content td {
   padding: 10px 14px !important;
-  border: 1px solid #1e293b !important;
+  border: 1px solid var(--border-color, #e2e8f0) !important;
   text-align: left !important;
 }
 
 .blog-rendered-content th {
-  background-color: #1e293b !important;
-  color: #ffffff !important;
+  background-color: var(--table-header-bg, #f8fafc) !important;
+  color: var(--heading-color, #0f172a) !important;
 }
