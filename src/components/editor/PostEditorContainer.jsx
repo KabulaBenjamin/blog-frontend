@@ -4,13 +4,16 @@ import RichTextEditor from './RichTextEditor';
 import RawHtmlEditor from './RawHtmlEditor';
 import MarkdownEditor from './MarkdownEditor';
 
-export default function PostEditorContainer({ post, user, onSaved }) {
+export default function PostEditorContainer({ post, user, onSaved, onDelete }) {
   const [title, setTitle] = useState(post ? post.title || '' : '');
-  const [content, setContent] = useState(post ? post.content || '' : '');
+  const [content, setContent] = useState(post ? post.content || post.body || '' : '');
   const [editorType, setEditorType] = useState(post ? post.editor_type || 'quill' : 'quill');
+  const [status, setStatus] = useState(post ? post.status || 'published' : 'published');
+  const [scheduledAt, setScheduledAt] = useState(post ? post.scheduled_at || '' : '');
   const [liveLink, setLiveLink] = useState(post ? post.live_link || '' : '');
   const [category, setCategory] = useState(post ? post.category || 'tech' : 'tech');
   const [tags, setTags] = useState(post ? post.tags || '' : '');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const quillRef = useRef(null);
 
@@ -58,6 +61,8 @@ export default function PostEditorContainer({ post, user, onSaved }) {
         title,
         content: finalContent || '',
         editor_type: editorType,
+        status,
+        scheduled_at: status === 'scheduled' ? scheduledAt : null,
         live_link: liveLink || '',
         category,
         tags: cleanTags
@@ -66,7 +71,7 @@ export default function PostEditorContainer({ post, user, onSaved }) {
       let url = 'https://blog-2y55.onrender.com/posts';
       let method = 'POST';
 
-      if (post) {
+      if (post && post.id) {
         url = `https://blog-2y55.onrender.com/posts/${post.id}`;
         method = 'PUT';
       } else {
@@ -83,12 +88,47 @@ export default function PostEditorContainer({ post, user, onSaved }) {
       const saved = await res.json();
       if (res.ok) {
         if (onSaved) onSaved(saved);
-        alert('Post saved successfully!');
+        alert(`Post ${post ? 'updated' : 'saved'} successfully!`);
       } else {
         alert(`Failed to save post: ${saved.message || 'Server error'}`);
       }
     } catch (err) {
       console.error('Save error:', err);
+      alert('An error occurred while saving the post.');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!post || !post.id) return;
+
+    if (!window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+
+      if (res.ok) {
+        alert('Post deleted successfully!');
+        if (onDelete) {
+          onDelete(post.id);
+        } else if (onSaved) {
+          onSaved(null);
+        }
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(`Failed to delete post: ${errorData.message || 'Server error'}`);
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('An error occurred while deleting the post.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -183,22 +223,68 @@ export default function PostEditorContainer({ post, user, onSaved }) {
         />
       )}
 
-      {/* Footer Link & Save */}
+      {/* Footer Link */}
       <input
         type="text"
         placeholder="Optional Live Project Link (https://...)"
         value={liveLink}
         onChange={e => setLiveLink(e.target.value)}
-        style={{ width: '100%', padding: '10px 14px', marginTop: '20px', marginBottom: '20px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
+        style={{ width: '100%', padding: '10px 14px', marginTop: '20px', marginBottom: '16px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
       />
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button 
-          onClick={handleSave} 
-          style={{ padding: '12px 28px', background: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', fontSize: '15px' }}
-        >
-          {post ? 'Update Post' : 'Publish Post'}
-        </button>
+      {/* Posting Mode & Action Controls */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <label style={{ fontWeight: '600', fontSize: '13px', color: '#475569' }}>Posting Status:</label>
+          <select
+            value={status}
+            onChange={e => setStatus(e.target.value)}
+            style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#fff', fontWeight: '500' }}
+          >
+            <option value="published">🚀 Publish Now</option>
+            <option value="draft">📝 Save as Draft</option>
+            <option value="scheduled">⏰ Schedule for Later</option>
+          </select>
+
+          {status === 'scheduled' && (
+            <input
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={e => setScheduledAt(e.target.value)}
+              style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+            />
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {post && post.id && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              style={{
+                padding: '12px 20px',
+                background: '#fee2e2',
+                color: '#ef4444',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: isDeleting ? 'not-allowed' : 'pointer',
+                fontWeight: '700',
+                fontSize: '15px'
+              }}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Post'}
+            </button>
+          )}
+
+          <button 
+            type="button"
+            onClick={handleSave} 
+            style={{ padding: '12px 28px', background: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', fontSize: '15px' }}
+          >
+            {post ? 'Update Post' : status === 'draft' ? 'Save Draft' : status === 'scheduled' ? 'Schedule Post' : 'Publish Post'}
+          </button>
+        </div>
       </div>
     </div>
   );
