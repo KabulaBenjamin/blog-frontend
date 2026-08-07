@@ -1,14 +1,11 @@
 // File Location: src/components/PostCard.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
+import parse from 'html-react-parser';
+import DOMPurify from 'dompurify';
 import he from 'he'; // HTML entity decoder
 
-// Required for LaTeX math formula rendering
+// CSS Imports
 import 'katex/dist/katex.min.css';
 import './PostCard.css';
 
@@ -18,7 +15,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
 
-  const isOwner = user && String(user.id) === String(post.user_id);
+  const isOwner = user && String(user.id) === String(post?.user_id);
 
   // Category Theme Helper Map
   const categoryTheme = {
@@ -94,13 +91,16 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
     }
   };
 
-  // 1. Decode HTML entities (&lt;h1&gt; -> <h1>)
+  // 1. Decode HTML entities (&lt;p&gt; -> <p>)
   const decodedContent = he.decode(post?.content || '');
 
-  // 2. Truncate text cleanly for Feed Mode
-  const displayContent = isFeedMode && decodedContent.length > 300 
+  // 2. Truncate clean string for Feed Mode
+  const contentToRender = isFeedMode && decodedContent.length > 300 
     ? decodedContent.substring(0, 300) + '...' 
     : decodedContent;
+
+  // 3. Sanitize HTML
+  const cleanHtml = DOMPurify.sanitize(contentToRender);
 
   const commentsCount = Array.isArray(post?.comments) ? post.comments.length : (post?.comments || 0);
 
@@ -110,7 +110,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
       {/* 1. EDITORIAL DARK HERO HEADER */}
       <div className="post-card-hero">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
-          {/* Category Pillar Badge */}
+          {/* Category Badge */}
           <span className="pill-category" style={{ background: theme.bg, color: theme.color, padding: '4px 10px', borderRadius: '12px' }}>
             {theme.label}
           </span>
@@ -143,21 +143,16 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
         </div>
       </div>
 
-      {/* 2. RENDERED CONTENT BODY */}
+      {/* 2. RENDERED CONTENT BODY (PARSED TO REACT NODES) */}
       <div className="blog-rendered-content ql-editor">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm, remarkMath]}
-          rehypePlugins={[rehypeRaw, rehypeKatex]}
-        >
-          {displayContent}
-        </ReactMarkdown>
-
-        {post?.live_link && (
-          <p style={{ marginTop: '20px' }}>
-            🔗 <a href={post.live_link} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>Live Project Link</a>
-          </p>
-        )}
+        {parse(cleanHtml)}
       </div>
+
+      {post?.live_link && (
+        <div style={{ padding: '0 32px 16px 32px', backgroundColor: '#0f0f11' }}>
+          🔗 <a href={post.live_link} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>Live Project Link</a>
+        </div>
+      )}
 
       {/* 3. CARD FOOTER & ACTIONS */}
       <div className="post-card-footer">
@@ -205,13 +200,13 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
       </div>
 
       {showCommentBox && !isFeedMode && (
-        <form onSubmit={handleCommentSubmit} style={{ padding: '0 28px 20px 28px', display: 'flex', gap: '8px' }}>
+        <form onSubmit={handleCommentSubmit} style={{ padding: '0 28px 20px 28px', display: 'flex', gap: '8px', backgroundColor: '#0b131e' }}>
           <input 
             type="text" 
             placeholder="Write a comment..." 
             value={commentText} 
             onChange={(e) => setCommentText(e.target.value)}
-            style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+            style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#1e293b', color: '#fff' }}
           />
           <button type="submit" style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
             Post
