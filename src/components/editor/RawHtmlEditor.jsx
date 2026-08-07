@@ -1,38 +1,27 @@
 // src/components/editor/RawHtmlEditor.jsx
-import React, { useState } from 'react';
+import React from 'react';
 import './RawHtmlEditor.css';
 
 export default function RawHtmlEditor({ content, onChange, onInsertDivider }) {
-  const [showPreview, setShowPreview] = useState(false);
-
   return (
     <div className="raw-html-editor-container">
-      <div className="html-toolbar">
+      <div className="raw-html-toolbar">
         <button 
           type="button" 
-          onClick={() => setShowPreview(!showPreview)} 
-          className="btn-toggle-preview"
+          onClick={onInsertDivider} 
+          className="raw-html-divider-btn"
         >
-          {showPreview ? '✏️ Back to Code View' : '👁️ Toggle Live Preview'}
-        </button>
-        <button type="button" onClick={onInsertDivider} className="btn-divider">
-          ⭕ Section Divider
+          ➕ Insert Section Divider (&lt;hr&gt;)
         </button>
       </div>
 
-      {showPreview ? (
-        <div 
-          className="html-preview-panel ql-editor"
-          dangerouslySetInnerHTML={{ __html: content }} 
-        />
-      ) : (
-        <textarea
-          className="html-code-area"
-          value={content}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="<h1>Paste or write unfiltered HTML here...</h1>&#10;<div style='color: red;'>Custom styles preserved</div>"
-        />
-      )}
+      <textarea
+        className="raw-html-textarea"
+        placeholder="Paste or write raw HTML code here..."
+        value={content}
+        onChange={e => onChange(e.target.value)}
+        spellCheck="false"
+      />
     </div>
   );
 }
