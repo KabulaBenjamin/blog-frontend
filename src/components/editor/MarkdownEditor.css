@@ -1,0 +1,38 @@
+/* src/components/editor/MarkdownEditor.css */
+.markdown-editor-container {
+  border: 1px solid #cbd5e1;
+  border-radius: 0 0 6px 6px;
+  overflow: hidden;
+  background: #1e293b;
+}
+
+.markdown-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #0f172a;
+  border-bottom: 1px solid #334155;
+}
+
+.markdown-badge {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.markdown-textarea {
+  width: 100%;
+  min-height: 450px;
+  padding: 16px;
+  font-family: 'Fira Code', Consolas, Monaco, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  border: none;
+  background: #1e293b;
+  color: #f1f5f9;
+  outline: none;
+  box-sizing: border-box;
+  resize: vertical;
+}

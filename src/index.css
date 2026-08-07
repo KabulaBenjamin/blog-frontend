@@ -187,28 +187,3 @@ footer a:hover {
 /* =========================================================================
    DARK CONTRAST THEME ADJUSTMENTS (Readability verification mode updates)
    ========================================================================= */
-.dark-theme {
-  background-color: #121212;
-  color: #e2e8f0; /* Soft contrast off-white instead of stark blinding white pure text blocks */
-}
-
-.dark-theme h1, .dark-theme h2, .dark-theme h3 {
-  color: #ffffff;
-}
-
-.dark-theme header, .dark-theme .quill-editor, .dark-theme input {
-  background-color: #1e1e1e;
-  color: #ffffff;
-  border-color: #2d3748;
-}
-
-.dark-theme .post, .dark-theme .profile {
-  background: #1e1e1e;
-  border-color: #2d3748;
-}
-
-.dark-theme footer {
-  background: #1a1a1a;
-  border-color: #2d3748;
-  color: #a0aec0;
-}

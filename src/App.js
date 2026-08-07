@@ -7,7 +7,7 @@ import logo from './logo.png';
 import BottomNav from './components/BottomNav';
 import Footer from './components/Footer';
 import Profile from './components/Profile';
-import QuillEditor from './components/QuillEditor';
+import PostEditorContainer from './components/PostEditorContainer';
 import Loader from './components/Loader';
 import BackendLoader from './components/BackendLoader'; 
 import ErrorBoundary from './components/ErrorBoundary';
@@ -57,7 +57,7 @@ function EditWrapper({ user, onSaved }) {
   if (loading) return <Loader />;
   if (!post) return <p>Post not found.</p>;
 
-  return <QuillEditor post={post} user={user} onSaved={onSaved} />;
+  return <PostEditorContainer post={post} user={user} onSaved={onSaved} />;
 }
 
 function App() {
@@ -279,7 +279,7 @@ function App() {
                   path="/new" 
                   element={
                     user ? (
-                      <QuillEditor user={user} onSaved={handleSaved} />
+                      <PostEditorContainer user={user} onSaved={handleSaved} />
                     ) : (
                       <Navigate to="/signin" replace />
                     )

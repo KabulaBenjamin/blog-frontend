@@ -1,0 +1,53 @@
+/* src/components/editor/RawHtmlEditor.css */
+.raw-html-editor-container {
+  border: 1px solid #cbd5e1;
+  border-radius: 0 0 6px 6px;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.html-toolbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.btn-toggle-preview, .btn-divider {
+  background: #334155;
+  color: #f8fafc;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.btn-toggle-preview:hover, .btn-divider:hover {
+  background: #475569;
+}
+
+.html-code-area {
+  width: 100%;
+  min-height: 450px;
+  padding: 16px;
+  font-family: 'Fira Code', Consolas, Monaco, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  border: none;
+  background: #0f172a;
+  color: #38bdf8;
+  outline: none;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.html-preview-panel {
+  padding: 24px;
+  background: #ffffff;
+  color: #0f172a;
+  min-height: 450px;
+  overflow-y: auto;
+}

@@ -7,14 +7,14 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // States for updating password when logged in
+  // States for updating password
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [passwordMessage, setPasswordMessage] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
-  // States for updating username when logged in
+  // States for updating username
   const [showUsernameForm, setShowUsernameForm] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [usernameMessage, setUsernameMessage] = useState('');
@@ -33,13 +33,11 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
     }
   }, [darkMode]);
 
-  // Helper to extract authentication token
   const getAuthToken = () => {
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
     return user?.token || storedUser.token;
   };
 
-  // 1. Log Out Handler
   const handleLogout = async () => {
     setIsLoggingOut(true);
     const token = getAuthToken();
@@ -55,7 +53,6 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
 
       if (response.ok) {
         localStorage.removeItem('user');
-        alert("Logged out cleanly.");
         if (typeof onLogoutSuccess === 'function') {
           onLogoutSuccess(); 
         } else {
@@ -72,7 +69,6 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
     }
   };
 
-  // 2. Account Deletion Handler
   const handleDeleteAccount = async () => {
     const confirmation = window.confirm(
       "⚠️ CRITICAL WARNING:\n\nAre you completely sure you want to permanently delete your account? This will wipe out all of your profile details and blog posts. This action cannot be undone."
@@ -114,7 +110,6 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
     }
   };
 
-  // 3. Logged-in Password Update Handler
   const handleChangePasswordDirectly = async (e) => {
     e.preventDefault();
     setPasswordError('');
@@ -151,7 +146,6 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
     }
   };
 
-  // 4. Logged-in Username Update Handler
   const handleChangeUsernameDirectly = async (e) => {
     e.preventDefault();
     setUsernameError('');
@@ -177,7 +171,6 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
         setUsernameMessage('Username updated perfectly!');
         setNewUsername('');
         
-        // Save user and new token in localStorage
         localStorage.setItem('user', JSON.stringify(data.user));
         
         if (typeof onSignedIn === 'function') {
@@ -201,14 +194,14 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px', textAlign: 'left' }}>
+    <div className="container settings-container">
       <h2>Settings</h2>
-      <hr />
+      <hr className="divider" />
 
       {/* Preferences Section */}
-      <div style={{ margin: '20px 0' }}>
+      <div className="settings-section">
         <h3>Preferences</h3>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+        <label className="toggle-label">
           <input 
             type="checkbox" 
             checked={darkMode} 
@@ -219,17 +212,16 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
       </div>
 
       {/* Account Management Section */}
-      <div style={{ margin: '30px 0' }}>
+      <div className="settings-section">
         <h3>Account Management</h3>
         {user ? (
           <div>
             <p>Logged in as: <strong>{user.username}</strong></p>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
-              
+            <div className="settings-actions">
               <button 
                 onClick={() => { setShowUsernameForm(!showUsernameForm); setShowPasswordForm(false); }}
                 disabled={isDeleting || isLoggingOut}
-                style={{ padding: '8px 12px', cursor: 'pointer' }}
+                className="btn btn-secondary"
               >
                 {showUsernameForm ? 'Cancel Identity Change' : 'Change Username'}
               </button>
@@ -237,7 +229,7 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
               <button 
                 onClick={() => { setShowPasswordForm(!showPasswordForm); setShowUsernameForm(false); }}
                 disabled={isDeleting || isLoggingOut}
-                style={{ padding: '8px 12px', cursor: 'pointer' }}
+                className="btn btn-secondary"
               >
                 {showPasswordForm ? 'Cancel Password Change' : 'Change Password'}
               </button>
@@ -245,13 +237,7 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
               <button 
                 onClick={handleLogout}
                 disabled={isDeleting || isLoggingOut}
-                style={{ 
-                  padding: '8px 12px', 
-                  backgroundColor: '#f0f0f0', 
-                  color: '#333', 
-                  border: '1px solid #ccc', 
-                  cursor: (isDeleting || isLoggingOut) ? 'not-allowed' : 'pointer' 
-                }}
+                className="btn btn-outline"
               >
                 {isLoggingOut ? 'Logging out...' : 'Log Out'}
               </button>
@@ -259,13 +245,7 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
               <button 
                 onClick={handleDeleteAccount}
                 disabled={isDeleting || isLoggingOut}
-                style={{ 
-                  padding: '8px 12px', 
-                  backgroundColor: isDeleting ? '#cca3a3' : '#ff4d4d', 
-                  color: '#fff', 
-                  border: 'none', 
-                  cursor: (isDeleting || isLoggingOut) ? 'not-allowed' : 'pointer' 
-                }}
+                className="btn btn-danger"
               >
                 {isDeleting ? 'Deleting Account...' : 'Delete Account'}
               </button>
@@ -273,19 +253,19 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
 
             {/* Inline Username Change Panel */}
             {showUsernameForm && (
-              <form onSubmit={handleChangeUsernameDirectly} style={{ background: '#f9f9f9', padding: '15px', borderRadius: '6px', border: '1px solid #ddd', maxWidth: '350px', marginBottom: '15px' }}>
+              <form onSubmit={handleChangeUsernameDirectly} className="settings-form">
                 <h4>Change Username</h4>
-                {usernameError && <p style={{ color: 'red', fontSize: '14px' }}>⚠️ {usernameError}</p>}
-                {usernameMessage && <p style={{ color: 'green', fontSize: '14px' }}>✅ {usernameMessage}</p>}
+                {usernameError && <p className="status-message error">⚠️ {usernameError}</p>}
+                {usernameMessage && <p className="status-message success">✅ {usernameMessage}</p>}
                 <input 
                   type="text"
                   placeholder="Enter unique new username"
                   value={newUsername}
                   onChange={(e) => setNewUsername(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
+                  className="form-input"
                 />
-                <button type="submit" disabled={isUpdatingUsername} style={{ padding: '6px 12px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                <button type="submit" disabled={isUpdatingUsername} className="btn btn-success">
                   {isUpdatingUsername ? 'Updating...' : 'Save Username'}
                 </button>
               </form>
@@ -293,31 +273,31 @@ function Settings({ user, onLogoutSuccess, onSignedIn }) {
 
             {/* Inline Password Change Panel */}
             {showPasswordForm && (
-              <form onSubmit={handleChangePasswordDirectly} style={{ background: '#f9f9f9', padding: '15px', borderRadius: '6px', border: '1px solid #ddd', maxWidth: '350px' }}>
+              <form onSubmit={handleChangePasswordDirectly} className="settings-form">
                 <h4>Update Your Password</h4>
-                {passwordError && <p style={{ color: 'red', fontSize: '14px' }}>⚠️ {passwordError}</p>}
-                {passwordMessage && <p style={{ color: 'green', fontSize: '14px' }}>✅ {passwordMessage}</p>}
+                {passwordError && <p className="status-message error">⚠️ {passwordError}</p>}
+                {passwordMessage && <p className="status-message success">✅ {passwordMessage}</p>}
                 <input 
                   type="password"
                   placeholder="Enter new strong password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
+                  className="form-input"
                 />
-                <button type="submit" disabled={isUpdatingPassword} style={{ padding: '6px 12px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                <button type="submit" disabled={isUpdatingPassword} className="btn btn-primary">
                   {isUpdatingPassword ? 'Updating...' : 'Save Password'}
                 </button>
               </form>
             )}
           </div>
         ) : (
-          <p style={{ color: '#888' }}>Please sign in to view account settings.</p>
+          <p className="muted-text">Please sign in to view account settings.</p>
         )}
       </div>
 
-      <hr />
-      <p style={{ fontSize: '12px', color: '#888', textAlign: 'center' }}>Koikoi Blog App — Version 1.0.0 (2026)</p>
+      <hr className="divider" />
+      <p className="footer-credits">Koikoi Blog App — Version 1.0.0 (2026)</p>
     </div>
   );
 }
