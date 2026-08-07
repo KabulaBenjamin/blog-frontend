@@ -7,7 +7,7 @@ import logo from './logo.png';
 import BottomNav from './components/BottomNav';
 import Footer from './components/Footer';
 import Profile from './components/Profile';
-import PostEditorContainer from './components/PostEditorContainer';
+import PostEditorContainer from './components/editor/PostEditorContainer';
 import Loader from './components/Loader';
 import BackendLoader from './components/BackendLoader'; 
 import ErrorBoundary from './components/ErrorBoundary';
