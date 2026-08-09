@@ -30,6 +30,20 @@
 .nav-icon {
   font-size: 20px;
   margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 🎯 Logo Sizing Constraints */
+.nav-icon img,
+.nav-item img,
+img.nav-logo {
+  height: 22px !important;       /* Constrains image height to fit standard icon row */
+  width: auto !important;        /* Prevents ratio distorting */
+  max-width: 24px !important;    /* Caps width to keep layout aligned */
+  object-fit: contain !important;
+  display: block !important;
 }
 
 /* 🎯 High-Visibility Active UI Accent Configuration */
