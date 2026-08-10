@@ -22,3 +22,38 @@
 .site-footer a:hover {
   text-decoration: underline;
 }
+.site-footer {
+  background-color: #0f172a;
+  color: #94a3b8;
+  padding: 24px 16px;
+  text-align: center;
+  margin-top: auto;
+  margin-bottom: 60px; /* Offset for fixed mobile bottom navigation */
+  border-top: 1px solid #1e293b;
+}
+
+.site-footer p {
+  margin: 0 0 12px 0;
+  font-size: 0.875rem;
+}
+
+.site-footer nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.site-footer nav a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.2s ease;
+}
+
+.site-footer nav a:hover {
+  color: #38bdf8;
+}
