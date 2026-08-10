@@ -1,10 +1,12 @@
 // src/components/editor/PostEditorContainer.jsx
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import RichTextEditor from './RichTextEditor';
 import RawHtmlEditor from './RawHtmlEditor';
 import MarkdownEditor from './MarkdownEditor';
 
 export default function PostEditorContainer({ post, user, onSaved, onDelete }) {
+  const navigate = useNavigate();
   const [title, setTitle] = useState(post ? post.title || '' : '');
   const [content, setContent] = useState(post ? post.content || post.body || '' : '');
   const [editorType, setEditorType] = useState(post ? post.editor_type || 'quill' : 'quill');
@@ -89,6 +91,9 @@ export default function PostEditorContainer({ post, user, onSaved, onDelete }) {
       if (res.ok) {
         if (onSaved) onSaved(saved);
         alert(`Post ${post ? 'updated' : 'saved'} successfully!`);
+        
+        // 🚀 Redirect home immediately after saving
+        navigate('/');
       } else {
         alert(`Failed to save post: ${saved.message || 'Server error'}`);
       }
@@ -120,6 +125,9 @@ export default function PostEditorContainer({ post, user, onSaved, onDelete }) {
         } else if (onSaved) {
           onSaved(null);
         }
+        
+        // 🚀 Redirect home after deleting
+        navigate('/');
       } else {
         const errorData = await res.json().catch(() => ({}));
         alert(`Failed to delete post: ${errorData.message || 'Server error'}`);
