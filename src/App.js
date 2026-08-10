@@ -12,8 +12,9 @@ import Loader from './components/Loader';
 import BackendLoader from './components/BackendLoader'; 
 import ErrorBoundary from './components/ErrorBoundary';
 
-// Global Consent Layer
+// Global Consent & Support Layers
 import CookieConsent from './components/CookieConsent'; 
+import SupportBanner from './components/SupportBanner'; // ☕ Floating support prompt
 
 // Dynamic components directory routes
 import Signin from './components/Signin';
@@ -31,6 +32,7 @@ import Home from './pages/Home';              // 🏠 New structured Home layout
 import Dashboard from './pages/Dashboard';    // 📊 New publisher analytics dashboard
 import AdminDashboard from './pages/AdminDashboard'; // 👑 Superuser control center
 import PostDetail from './pages/PostDetail';  // 📝 Dedicated single post details page
+import Donate from './pages/Donate';          // 💳 Community donation page
 
 // Added Navigate here to protect client-side routes gracefully
 import { BrowserRouter as Router, Routes, Route, useParams, Navigate } from 'react-router-dom';
@@ -240,6 +242,9 @@ function App() {
                 {/* 📝 Dedicated Single Post Details View Route */}
                 <Route path="/posts/:id" element={<PostDetail user={user} />} />
 
+                {/* ☕ Community Donation Route */}
+                <Route path="/donate" element={<Donate />} />
+
                 {/* 📊 Publisher Analytics Workstation Dashboard Route */}
                 <Route 
                   path="/dashboard" 
@@ -324,6 +329,7 @@ function App() {
           
           {/* Global Modal/Banner Overlays */}
           <CookieConsent /> 
+          <SupportBanner />
         </div>
       </ErrorBoundary>
     </Router>
