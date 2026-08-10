@@ -1,34 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap');
 
-/* Dynamic Variable for Universal Horizontal Padding */
 :root {
-  --content-padding: clamp(16px, 4vw, 40px);
+  --content-padding: clamp(16px, 3.5vw, 48px);
 }
 
 /* ==========================================================================
-   CORE POST CONTAINER & STRUCTURE
+   POST CONTAINER LAYOUT
    ========================================================================== */
 
 .post-card {
   width: 100%;
-  margin: 0 auto 32px auto;
+  margin: 0 auto;
   background-color: var(--card-bg, #ffffff);
-  box-shadow: 0 4px 16px var(--shadow-color, rgba(0, 0, 0, 0.05));
   font-family: 'Source Serif 4', 'Georgia', serif;
   color: var(--text-color, #0f172a);
   box-sizing: border-box;
 }
 
+/* Full Screen / Single Post View Expansion */
 .post-card.full-screen-mode {
+  width: 100% !important;
+  max-width: 100% !important;
   min-height: 100vh;
-  border: none;
-  border-radius: 0;
+  border: none !important;
+  border-radius: 0 !important;
+  box-sizing: border-box;
 }
 
 .post-card.feed-mode-card {
+  max-width: 800px;
+  margin: 0 auto 32px auto;
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 4px 16px var(--shadow-color, rgba(0, 0, 0, 0.05));
 }
 
 /* Hero Banner Header */
@@ -67,7 +72,7 @@
 .post-card-hero h1,
 .hero-title {
   font-family: 'Playfair Display', 'Georgia', serif;
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-size: clamp(1.8rem, 4.5vw, 3rem);
   font-weight: 700;
   line-height: 1.15;
   color: var(--heading-color, #0f172a);
@@ -90,17 +95,29 @@
 }
 
 /* ==========================================================================
-   ARTICLE CONTENT & MEDIA RESPONSIVENESS
+   ARTICLE RENDERED CONTENT
    ========================================================================== */
 
 .blog-rendered-content {
+  width: 100%;
   padding: var(--content-padding);
   font-family: 'Source Serif 4', 'Georgia', serif;
-  font-size: clamp(1rem, 2vw, 1.12rem);
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
   line-height: 1.85;
   color: var(--text-color, #1e293b);
   box-sizing: border-box;
   overflow-x: hidden;
+}
+
+/* Content Container Max Width Rules (Desktop Reading Area) */
+.post-card.full-screen-mode .blog-rendered-content,
+.post-card.full-screen-mode .post-card-hero,
+.post-card.full-screen-mode .post-card-footer,
+.post-card.full-screen-mode .post-nav-bar {
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
 }
 
 .blog-rendered-content img,
@@ -131,7 +148,7 @@
   pointer-events: none;
 }
 
-/* Paragraph and Headings Spacing */
+/* Spacing and Formatting Overrides */
 .blog-rendered-content p,
 .blog-rendered-content.ql-editor p {
   margin-top: 0 !important;
@@ -172,7 +189,7 @@
   margin-bottom: 0.35rem !important;
 }
 
-/* Callouts and Code Blocks */
+/* Blockquotes, Boxes, Tables */
 .blog-rendered-content blockquote,
 .blog-rendered-content div.callout {
   background-color: var(--callout-bg, #f8fafc) !important;
@@ -198,7 +215,6 @@
   border-radius: 4px !important;
 }
 
-/* Box Callouts & Tables */
 .blog-rendered-content .box {
   padding: 1.25rem 1.5rem !important;
   border-radius: 8px !important;
@@ -231,7 +247,7 @@
 }
 
 /* ==========================================================================
-   FOOTER, ACTION BUTTONS & COMMENT FORM
+   FOOTER, ACTION BUTTONS & BOTTOM NAVIGATION
    ========================================================================== */
 
 .post-card-footer {
@@ -276,10 +292,6 @@
   border: 1px solid #cbd5e1;
 }
 
-/* ==========================================================================
-   RAW HTML IFRAME CONTAINER
-   ========================================================================== */
-
 .iframe-container {
   width: 100%;
   position: relative;
@@ -291,10 +303,6 @@
   max-height: 450px;
   overflow: hidden;
 }
-
-/* ==========================================================================
-   BOTTOM NAVIGATION BAR (Home / Previous / Next)
-   ========================================================================== */
 
 .post-nav-bar {
   display: flex;
@@ -322,14 +330,17 @@
 .btn-home { background: #2563eb; border-color: #2563eb; }
 .btn-home:hover { background: #1d4ed8; }
 
-/* Mobile Adjustments */
+/* Mobile & Android Webview Compatibility Adjustments */
 @media (max-width: 640px) {
+  :root {
+    --content-padding: 16px;
+  }
   .actions, .post-nav-bar {
     width: 100%;
   }
   .btn-nav {
     flex: 1;
-    padding: 10px 8px;
+    padding: 10px 6px;
     font-size: 0.8rem;
     text-align: center;
   }

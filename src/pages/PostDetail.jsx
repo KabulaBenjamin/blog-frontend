@@ -1,7 +1,7 @@
 // File Location: src/pages/PostDetail.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import PostCard from '../components/PostCard'; //  Correct path
+import PostCard from '../components/PostCard'; // Correct path
 
 export default function PostDetail({ user }) {
   const { id } = useParams();
@@ -34,12 +34,14 @@ export default function PostDetail({ user }) {
     }
   }, [id]);
 
-  if (loading) return <div className="container"><h3>Loading article data streams...</h3></div>;
-  if (!post) return <div className="container"><h3>Post not found.</h3><button onClick={() => navigate('/')}>Back Home</button></div>;
+  if (loading) return <div className="post-detail-page" style={{ padding: '40px', textAlign: 'center' }}><h3>Loading article data streams...</h3></div>;
+  if (!post) return <div className="post-detail-page" style={{ padding: '40px', textAlign: 'center' }}><h3>Post not found.</h3><button className="btn btn-primary" onClick={() => navigate('/')}>Back Home</button></div>;
 
   return (
-    <div className="container">
-      <button onClick={() => navigate(-1)} style={{ marginBottom: '15px', cursor: 'pointer' }}>← Back</button>
+    <div className="post-detail-page">
+      <div className="post-detail-header">
+        <button className="btn-back" onClick={() => navigate(-1)}>← Back</button>
+      </div>
       <PostCard 
         post={post} 
         user={user} 
