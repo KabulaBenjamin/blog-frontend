@@ -65,17 +65,19 @@ export default function ReadingTracker({ userId, postId }) {
 
   return (
     <div style={{
-      position: 'sticky',
+      position: 'fixed',
       top: 0,
-      zIndex: 999,
+      left: 0,
+      right: 0,
+      zIndex: 9999, // Guarantees staying above expanded content and headers
       background: '#0f172a',
       color: '#ffffff',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.15)'
+      boxShadow: '0 2px 10px rgba(0,0,0,0.25)'
     }}>
       {/* Top Banner Control Row */}
       <div style={{
         display: 'flex',
-        justify: 'space-between',
+        justifyContent: 'space-between', // Fixed typo from 'justify'
         alignItems: 'center',
         padding: '8px 16px',
         fontSize: '0.85rem'
