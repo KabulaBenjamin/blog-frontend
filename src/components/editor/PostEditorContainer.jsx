@@ -1,5 +1,4 @@
-// src/components/editor/PostEditorContainer.jsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RichTextEditor from './RichTextEditor';
 import RawHtmlEditor from './RawHtmlEditor';
@@ -13,11 +12,36 @@ export default function PostEditorContainer({ post, user, onSaved, onDelete }) {
   const [status, setStatus] = useState(post ? post.status || 'published' : 'published');
   const [scheduledAt, setScheduledAt] = useState(post ? post.scheduled_at || '' : '');
   const [liveLink, setLiveLink] = useState(post ? post.live_link || '' : '');
-  const [category, setCategory] = useState(post ? post.category || 'tech' : 'tech');
+  
+  // 🏷️ Category State Matrix
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(post ? post.category_id || '' : '');
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
   const [tags, setTags] = useState(post ? post.tags || '' : '');
   const [isDeleting, setIsDeleting] = useState(false);
 
   const quillRef = useRef(null);
+
+  // 1. Fetch categories from Supabase-backed API endpoint
+  useEffect(() => {
+    fetch('https://blog-2y55.onrender.com/categories')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCategories(data);
+          // Pre-select first category if creating a new post without selection
+          if (!post && data.length > 0) {
+            setSelectedCategoryId(data[0].id);
+          }
+        }
+        setLoadingCategories(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching categories from backend:', err);
+        setLoadingCategories(false);
+      });
+  }, [post]);
 
   const handleModeChange = (newMode) => {
     if (newMode === editorType) return;
@@ -58,6 +82,9 @@ export default function PostEditorContainer({ post, user, onSaved, onDelete }) {
       .filter(Boolean)
       .join(', ');
 
+    // Match selected category object to maintain backwards compatibility for 'category' text
+    const activeCategoryObj = categories.find(c => String(c.id) === String(selectedCategoryId));
+
     try {
       const postData = {
         title,
@@ -66,7 +93,8 @@ export default function PostEditorContainer({ post, user, onSaved, onDelete }) {
         status,
         scheduled_at: status === 'scheduled' ? scheduledAt : null,
         live_link: liveLink || '',
-        category,
+        category: activeCategoryObj ? activeCategoryObj.name : 'Technology',
+        category_id: selectedCategoryId ? Number(selectedCategoryId) : null,
         tags: cleanTags
       };
 
@@ -92,7 +120,7 @@ export default function PostEditorContainer({ post, user, onSaved, onDelete }) {
         if (onSaved) onSaved(saved);
         alert(`Post ${post ? 'updated' : 'saved'} successfully!`);
         
-        // 🚀 Redirect home immediately after saving
+        // Redirect home immediately after saving
         navigate('/');
       } else {
         alert(`Failed to save post: ${saved.message || 'Server error'}`);
@@ -126,7 +154,6 @@ export default function PostEditorContainer({ post, user, onSaved, onDelete }) {
           onSaved(null);
         }
         
-        // 🚀 Redirect home after deleting
         navigate('/');
       } else {
         const errorData = await res.json().catch(() => ({}));
@@ -154,16 +181,22 @@ export default function PostEditorContainer({ post, user, onSaved, onDelete }) {
       {/* Category and Tags */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
         <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px', color: '#475569' }}>Content Pillar</label>
+          <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px', color: '#475569' }}>Category</label>
           <select 
-            value={category} 
-            onChange={e => setCategory(e.target.value)}
+            value={selectedCategoryId} 
+            onChange={e => setSelectedCategoryId(e.target.value)}
+            disabled={loadingCategories}
             style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#fff' }}
           >
-            <option value="tech">💻 Tech (Software & Engineering)</option>
-            <option value="education">📐 Education (High School Math & Science)</option>
-            <option value="ai-research">🤖 AI Research (ML & Neural Networks)</option>
-            <option value="faith">🌱 Faith (Reflections & Theology)</option>
+            {loadingCategories ? (
+              <option value="">Loading categories...</option>
+            ) : (
+              categories.map(cat => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))
+            )}
           </select>
         </div>
 
