@@ -332,7 +332,30 @@
 }
 
 /* Embedded Data Tables */
-.blog-rendered-content table {
+.blog-rendered-c/* Allow embedded styles to override wrapper defaults */
+.blog-rendered-content {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
+/* Optional height restriction for feed cards without slicing HTML tags */
+.blog-rendered-content.feed-mode-preview {
+  max-height: 520px;
+  overflow: hidden;
+  position: relative;
+}
+
+.blog-rendered-content.feed-mode-preview::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95));
+  pointer-events: none;
+}ontent table {
   width: 100% !important;
   border-collapse: collapse !important;
   margin: 1.25rem 0 !important;

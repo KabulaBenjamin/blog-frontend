@@ -94,57 +94,57 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   // 1. Decode HTML entities (&lt;p&gt; -> <p>)
   const decodedContent = he.decode(post?.content || '');
 
-  // 2. Truncate clean string for Feed Mode
-  const contentToRender = isFeedMode && decodedContent.length > 300 
-    ? decodedContent.substring(0, 300) + '...' 
-    : decodedContent;
+  // 2. Configure DOMPurify to keep <style> blocks, head styles, and custom attributes
+  const cleanHtml = DOMPurify.sanitize(decodedContent, {
+    ADD_TAGS: ['style', 'details', 'summary', 'header', 'nav', 'article', 'section', 'main', 'aside'],
+    ADD_ATTR: ['class', 'id', 'style', 'open', 'aria-label', 'target', 'rel', 'colspan', 'rowspan'],
+    FORCE_BODY: false
+  });
 
-  // 3. Sanitize HTML
-  const cleanHtml = DOMPurify.sanitize(contentToRender);
+  // 3. Detect if post content contains a custom header hero element
+  const hasEmbeddedHero = cleanHtml.includes('class="hero"') || cleanHtml.includes('sanctuary-post-root');
 
   const commentsCount = Array.isArray(post?.comments) ? post.comments.length : (post?.comments || 0);
 
   return (
-    <div className="post-card">
+    <div className={`post-card ${isFeedMode ? 'feed-mode-card' : ''}`}>
       
-      {/* 1. EDITORIAL DARK HERO HEADER */}
-      <div className="post-card-hero">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
-          {/* Category Badge */}
-          <span className="pill-category" style={{ background: theme.bg, color: theme.color, padding: '4px 10px', borderRadius: '12px' }}>
-            {theme.label}
-          </span>
-
-          {/* Subcategory Tags */}
-          {post?.tags && post.tags.trim() !== "" && post.tags.split(',').map((tag, idx) => (
-            <span key={idx} style={{ 
-              fontSize: '11px', 
-              background: 'rgba(255, 255, 255, 0.1)', 
-              color: '#cbd5e1', 
-              padding: '2px 8px', 
-              borderRadius: '4px',
-              fontWeight: '500'
-            }}>
-              #{tag.trim()}
+      {/* Conditionally hide top banner wrapper if raw HTML brings its own header hero layout */}
+      {!hasEmbeddedHero && (
+        <div className="post-card-hero">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
+            <span className="pill-category" style={{ background: theme.bg, color: theme.color, padding: '4px 10px', borderRadius: '12px' }}>
+              {theme.label}
             </span>
-          ))}
+
+            {post?.tags && post.tags.trim() !== "" && post.tags.split(',').map((tag, idx) => (
+              <span key={idx} style={{ 
+                fontSize: '11px', 
+                background: 'rgba(255, 255, 255, 0.1)', 
+                color: '#cbd5e1', 
+                padding: '2px 8px', 
+                borderRadius: '4px',
+                fontWeight: '500'
+              }}>
+                #{tag.trim()}
+              </span>
+            ))}
+          </div>
+
+          <h2 style={{ cursor: 'pointer' }} onClick={() => navigate(`/posts/${post.id}`)}>
+            {post?.title}
+          </h2>
+
+          <div className="hero-meta">
+            <span>BY: {post?.username || 'UNKNOWN'}</span>
+            <span>👍 {post?.likes || 0} LIKES</span>
+            <span>💬 {commentsCount} COMMENTS</span>
+          </div>
         </div>
+      )}
 
-        {/* Title */}
-        <h2 style={{ cursor: 'pointer' }} onClick={() => navigate(`/posts/${post.id}`)}>
-          {post?.title}
-        </h2>
-
-        {/* Hero Meta Bar */}
-        <div className="hero-meta">
-          <span>BY: {post?.username || 'UNKNOWN'}</span>
-          <span>👍 {post?.likes || 0} LIKES</span>
-          <span>💬 {commentsCount} COMMENTS</span>
-        </div>
-      </div>
-
-      {/* 2. RENDERED CONTENT BODY (PARSED TO REACT NODES) */}
-      <div className="blog-rendered-content ql-editor">
+      {/* 2. UNMODIFIED RENDERED CONTENT BODY */}
+      <div className={`blog-rendered-content ql-editor ${isFeedMode ? 'feed-mode-preview' : ''}`}>
         {parse(cleanHtml)}
       </div>
 
