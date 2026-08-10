@@ -1,5 +1,5 @@
 // File Location: src/components/PostCard.js
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import parse from 'html-react-parser';
 import DOMPurify from 'dompurify';
@@ -33,7 +33,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   // Decode HTML entities (&lt;p&gt; -> <p>)
   const decodedContent = he.decode(post?.content || '');
 
-  // Detect if the content is a full/custom HTML document layout
+  // Detect if content is a custom HTML document layout
   const isRawHtmlPost = 
     decodedContent.includes('<header') || 
     decodedContent.includes('class="hero"') || 
@@ -41,7 +41,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
     decodedContent.includes('<!DOCTYPE html>') ||
     decodedContent.includes('<style>');
 
-  // Auto-adjust iframe height to match internal document content seamlessly
+  // Auto-adjust iframe height
   const handleIframeLoad = () => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       try {
@@ -115,7 +115,11 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
 
   const commentsCount = Array.isArray(post?.comments) ? post.comments.length : (post?.comments || 0);
 
-  // Inject standard CSS resets into the iframe head to fix browser margins
+  // Bottom Navigation
+  const handleGoHome = () => navigate('/');
+  const handlePrevPost = () => post?.id && navigate(`/posts/${Number(post.id) - 1}`);
+  const handleNextPost = () => post?.id && navigate(`/posts/${Number(post.id) + 1}`);
+
   const fullDocumentSource = `
     <!DOCTYPE html>
     <html>
@@ -129,6 +133,10 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
             box-sizing: border-box;
             font-family: system-ui, -apple-system, sans-serif;
           }
+          img, svg, iframe, video {
+            max-width: 100% !important;
+            height: auto !important;
+          }
         </style>
       </head>
       <body>
@@ -137,12 +145,42 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
     </html>
   `;
 
-  // =========================================================================
-  // 1. RAW HTML IFRAME MODE (100% Localhost Identical)
-  // =========================================================================
-  if (isRawHtmlPost) {
-    return (
-      <div className="raw-html-post-wrapper">
+  // Standard Sanitized HTML Mode
+  const cleanHtml = DOMPurify.sanitize(decodedContent, {
+    ADD_TAGS: ['style', 'details', 'summary', 'header', 'nav', 'article', 'section', 'main', 'aside', 'svg', 'path', 'g'],
+    ADD_ATTR: ['class', 'id', 'style', 'open', 'aria-label', 'target', 'rel', 'colspan', 'rowspan', 'xmlns', 'viewBox', 'd', 'fill'],
+    FORCE_BODY: false
+  });
+
+  return (
+    <div className={`post-card ${!isFeedMode ? 'full-screen-mode' : 'feed-mode-card'}`}>
+      
+      {/* 1. HERO HEADER AREA */}
+      <div className="post-card-hero">
+        <div className="hero-top-bar">
+          <span className="pill-category" style={{ background: theme.bg, color: theme.color }}>
+            {theme.label}
+          </span>
+          {post?.tags && post.tags.trim() !== "" && post.tags.split(',').map((tag, idx) => (
+            <span key={idx} className="post-tag">
+              #{tag.trim()}
+            </span>
+          ))}
+        </div>
+
+        <h1 className="hero-title" onClick={() => navigate(`/posts/${post.id}`)}>
+          {post?.title}
+        </h1>
+
+        <div className="hero-meta">
+          <span>BY: {post?.username || 'UNKNOWN'}</span>
+          <span>👍 {post?.likes || 0} LIKES</span>
+          <span>💬 {commentsCount} COMMENTS</span>
+        </div>
+      </div>
+
+      {/* 2. CONTENT AREA (IFRAME OR RENDERED HTML) */}
+      {isRawHtmlPost ? (
         <div className={`iframe-container ${isFeedMode ? 'feed-preview-frame' : ''}`}>
           <iframe
             ref={iframeRef}
@@ -158,93 +196,27 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
             sandbox="allow-scripts allow-same-origin"
           />
         </div>
-
-        {/* Action Controls Footer */}
-        <div className="post-card-footer raw-footer">
-          <div className="actions">
-            {isFeedMode ? (
-              <button onClick={() => navigate(`/posts/${post.id}`)} className="btn-primary">
-                Read Full Post
-              </button>
-            ) : (
-              <>
-                <button onClick={handleLike} disabled={isLiking || !user} className="btn-secondary">
-                  {isLiking ? 'Saving...' : hasLiked ? '❤️ Liked' : '👍 Like'}
-                </button>
-                <button onClick={() => setShowCommentBox(!showCommentBox)} className="btn-secondary">
-                  Comment
-                </button>
-              </>
-            )}
-            <button onClick={handleShare} className="btn-secondary">Share</button>
-            {isOwner && (
-              <>
-                <button onClick={() => navigate(`/edit/${post.id}`)} className="btn-outline">Edit</button>
-                <button onClick={handleDelete} className="btn-danger">Delete</button>
-              </>
-            )}
-          </div>
+      ) : (
+        <div className={`blog-rendered-content ql-editor ${isFeedMode ? 'feed-mode-preview' : ''}`}>
+          {parse(cleanHtml)}
         </div>
+      )}
 
-        {showCommentBox && !isFeedMode && (
-          <form onSubmit={handleCommentSubmit} className="comment-form">
-            <input 
-              type="text" 
-              placeholder="Write a comment..." 
-              value={commentText} 
-              onChange={(e) => setCommentText(e.target.value)}
-            />
-            <button type="submit" className="btn-primary">Post</button>
-          </form>
-        )}
-      </div>
-    );
-  }
-
-  // =========================================================================
-  // 2. STANDARD CARD MODE (For simple formatted text)
-  // =========================================================================
-  const cleanHtml = DOMPurify.sanitize(decodedContent);
-
-  return (
-    <div className="post-card">
-      <div className="post-card-hero">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
-          <span className="pill-category" style={{ background: theme.bg, color: theme.color, padding: '4px 10px', borderRadius: '12px' }}>
-            {theme.label}
-          </span>
-          {post?.tags && post.tags.trim() !== "" && post.tags.split(',').map((tag, idx) => (
-            <span key={idx} style={{ fontSize: '11px', background: 'rgba(255, 255, 255, 0.1)', color: '#cbd5e1', padding: '2px 8px', borderRadius: '4px', fontWeight: '500' }}>
-              #{tag.trim()}
-            </span>
-          ))}
-        </div>
-
-        <h2 style={{ cursor: 'pointer' }} onClick={() => navigate(`/posts/${post.id}`)}>
-          {post?.title}
-        </h2>
-
-        <div className="hero-meta">
-          <span>BY: {post?.username || 'UNKNOWN'}</span>
-          <span>👍 {post?.likes || 0} LIKES</span>
-          <span>💬 {commentsCount} COMMENTS</span>
-        </div>
-      </div>
-
-      <div className={`blog-rendered-content ql-editor ${isFeedMode ? 'feed-mode-preview' : ''}`}>
-        {parse(cleanHtml)}
-      </div>
-
+      {/* 3. POST INTERACTION BUTTONS */}
       <div className="post-card-footer">
         <div className="actions">
           {isFeedMode ? (
-            <button onClick={() => navigate(`/posts/${post.id}`)} className="btn-primary">Read Full Post</button>
+            <button onClick={() => navigate(`/posts/${post.id}`)} className="btn-primary">
+              Read Full Post
+            </button>
           ) : (
             <>
-              <button onClick={handleLike} disabled={isLiking || !user} className="btn-secondary">
+              <button onClick={handleLike} disabled={isLiking || !user} className={`btn-secondary ${hasLiked ? 'liked' : ''}`}>
                 {isLiking ? 'Saving...' : hasLiked ? '❤️ Liked' : '👍 Like'}
               </button>
-              <button onClick={() => setShowCommentBox(!showCommentBox)} className="btn-secondary">Comment</button>
+              <button onClick={() => setShowCommentBox(!showCommentBox)} className="btn-secondary">
+                Comment
+              </button>
             </>
           )}
           <button onClick={handleShare} className="btn-secondary">Share</button>
@@ -257,6 +229,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
         </div>
       </div>
 
+      {/* COMMENT BOX */}
       {showCommentBox && !isFeedMode && (
         <form onSubmit={handleCommentSubmit} className="comment-form">
           <input 
@@ -268,6 +241,22 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
           <button type="submit" className="btn-primary">Post</button>
         </form>
       )}
+
+      {/* 4. BOTTOM POST NAVIGATION BAR */}
+      {!isFeedMode && (
+        <div className="post-nav-bar">
+          <button onClick={handlePrevPost} className="btn-nav">
+            ← Previous
+          </button>
+          <button onClick={handleGoHome} className="btn-nav btn-home">
+            🏠 Home
+          </button>
+          <button onClick={handleNextPost} className="btn-nav">
+            Next →
+          </button>
+        </div>
+      )}
+
     </div>
   );
 }
