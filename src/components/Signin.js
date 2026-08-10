@@ -43,6 +43,11 @@ function Signin({ onSignedIn }) {
       if (view === 'signin') {
         if (data.success) {
           localStorage.setItem('user', JSON.stringify(data.user));
+          
+          // ☕ RESET SESSION BANNER SUPPRESSION ON LOGIN
+          sessionStorage.removeItem('support_banner_dismissed_session');
+          sessionStorage.removeItem('support_banner_dismissed');
+          
           onSignedIn(data.user);
           window.location.href = '/';
         }

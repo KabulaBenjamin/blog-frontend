@@ -6,8 +6,8 @@ export default function SupportBanner() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Show banner after 8 seconds if user hasn't dismissed it this session
-    const dismissed = sessionStorage.getItem('support_banner_dismissed');
+    // Session-based trigger: pops up once per login/session
+    const dismissed = sessionStorage.getItem('support_banner_dismissed_session');
     if (!dismissed) {
       const timer = setTimeout(() => setVisible(true), 8000);
       return () => clearTimeout(timer);
@@ -15,7 +15,7 @@ export default function SupportBanner() {
   }, []);
 
   const handleDismiss = () => {
-    sessionStorage.setItem('support_banner_dismissed', 'true');
+    sessionStorage.setItem('support_banner_dismissed_session', 'true');
     setVisible(false);
   };
 
@@ -24,14 +24,14 @@ export default function SupportBanner() {
   return (
     <div style={{
       position: 'fixed',
-      bottom: '20px',
+      bottom: '80px', // Raised so it doesn't block the mobile BottomNav bar
       right: '20px',
       maxWidth: '360px',
       background: '#0f172a',
       color: '#ffffff',
       padding: '16px 20px',
       borderRadius: '12px',
-      boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+      boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
       zIndex: 1000,
       display: 'flex',
       flexDirection: 'column',
@@ -47,14 +47,14 @@ export default function SupportBanner() {
         </button>
       </div>
       <p style={{ fontSize: '0.85rem', color: '#cbd5e1', margin: 0, lineHeight: '1.4' }}>
-        Enjoying the content? Help keep this community ad-free and open. Donate via M-Pesa (Pochi): <strong>+254 798 030 091</strong>
+        Enjoying Koikoi Blog? Help keep this platform open and ad-free. Donate via M-Pesa or Bank!
       </p>
       <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
         <button 
           onClick={() => { handleDismiss(); navigate('/donate'); }}
-          style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}
+          style={{ background: '#16a34a', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}
         >
-          View All Options
+          Donate Now
         </button>
         <button 
           onClick={handleDismiss}

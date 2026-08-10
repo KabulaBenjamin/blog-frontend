@@ -18,6 +18,16 @@ function BottomNav({ user }) {
         <span className="nav-label">Home</span>
       </NavLink>
 
+      {/* ☕ Donate Tab (Direct high-visibility CTA) */}
+      <NavLink 
+        to="/donate" 
+        className={({ isActive }) => isActive ? 'nav-item active donate-tab' : 'nav-item donate-tab'}
+        style={{ color: '#16a34a' }}
+      >
+        <span className="nav-icon" role="img" aria-label="donate">☕</span>
+        <span className="nav-label" style={{ fontWeight: 'bold' }}>Donate</span>
+      </NavLink>
+
       {/* ➕ Post Tab */}
       <NavLink 
         to={user ? "/new" : "/signin"} 
@@ -62,7 +72,7 @@ function BottomNav({ user }) {
         className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
       >
         <span className="nav-icon" role="img" aria-label="notifications">🔔</span>
-        <span className="nav-label">Notifications</span>
+        <span className="nav-label">Alerts</span>
       </NavLink>
 
       {/* ⚙️ Settings Tab */}
