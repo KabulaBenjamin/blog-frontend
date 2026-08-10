@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap');
 
-/* Core Post Container */
+/* ==========================================================================
+   CORE POST CONTAINER & STRUCTURE
+   ========================================================================== */
+
 .post-card {
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 12px;
@@ -64,14 +67,33 @@
   white-space: nowrap;
 }
 
-/* Article Content Body */
+/* Article Content Body Reset & Styles */
 .blog-rendered-content {
-  padding: 32px;
+  padding: 0 !important;
+  margin: 0 !important;
   font-family: 'Source Serif 4', 'Georgia', serif;
   font-size: 1.12rem;
   line-height: 1.85;
   color: var(--text-color, #1e293b);
-  background-color: var(--card-bg, #ffffff);
+  background: transparent !important;
+}
+
+/* Optional height restriction for feed cards without slicing HTML tags */
+.blog-rendered-content.feed-mode-preview {
+  max-height: 520px;
+  overflow: hidden;
+  position: relative;
+}
+
+.blog-rendered-content.feed-mode-preview::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95));
+  pointer-events: none;
 }
 
 /* ==========================================================================
@@ -216,7 +238,70 @@
   padding: 0 !important;
 }
 
-/* Footer & Actions Bar */
+/* ==========================================================================
+   DYNAMIC CALLOUT BOXES & TABLES
+   ========================================================================== */
+
+.blog-rendered-content .box {
+  padding: 1.25rem 1.5rem !important;
+  border-radius: 8px !important;
+  margin: 1.25rem 0 !important;
+  border: 1px solid transparent !important;
+}
+
+/* Life / Tip Callout Box */
+.blog-rendered-content .box.life {
+  background-color: var(--box-life-bg, #fef9e7) !important;
+  border-color: var(--box-life-border, #f7e1a0) !important;
+  color: var(--box-life-text, #7d5a18) !important;
+}
+
+.blog-rendered-content .box.life p {
+  color: var(--box-life-text, #7d5a18) !important;
+}
+
+/* Definition Callout Box */
+.blog-rendered-content .box.definition {
+  background-color: var(--box-def-bg, #f1f5f9) !important;
+  border-color: var(--box-def-border, #cbd5e1) !important;
+  color: var(--box-def-text, #1e293b) !important;
+}
+
+.blog-rendered-content .box.definition p {
+  color: var(--box-def-text, #1e293b) !important;
+}
+
+.blog-rendered-content .box-title {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1.05rem !important;
+  margin-bottom: 0.5rem !important;
+  display: block !important;
+}
+
+/* Embedded Data Tables */
+.blog-rendered-content table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 1.25rem 0 !important;
+}
+
+.blog-rendered-content th,
+.blog-rendered-content td {
+  padding: 10px 14px !important;
+  border: 1px solid var(--border-color, #e2e8f0) !important;
+  text-align: left !important;
+}
+
+.blog-rendered-content th {
+  background-color: var(--table-header-bg, #f8fafc) !important;
+  color: var(--heading-color, #0f172a) !important;
+}
+
+/* ==========================================================================
+   FOOTER, ACTION BUTTONS & COMMENT FORM
+   ========================================================================== */
+
 .post-card-footer {
   padding: 16px 32px;
   background-color: var(--footer-bg, #f8fafc);
@@ -293,82 +378,40 @@
   color: var(--text-color, #0f172a);
 }
 
-/* Dynamic Callout Boxes & Tables */
-.blog-rendered-content .box {
-  padding: 1.25rem 1.5rem !important;
-  border-radius: 8px !important;
-  margin: 1.25rem 0 !important;
-  border: 1px solid transparent !important;
-}
+/* ==========================================================================
+   RAW HTML DIRECT MODE CANVAS RESETS & IFRAME WRAPPERS
+   ========================================================================== */
 
-/* Life / Tip Callout Box */
-.blog-rendered-content .box.life {
-  background-color: var(--box-life-bg, #fef9e7) !important;
-  border-color: var(--box-life-border, #f7e1a0) !important;
-  color: var(--box-life-text, #7d5a18) !important;
-}
-
-.blog-rendered-content .box.life p {
-  color: var(--box-life-text, #7d5a18) !important;
-}
-
-/* Definition Callout Box */
-.blog-rendered-content .box.definition {
-  background-color: var(--box-def-bg, #f1f5f9) !important;
-  border-color: var(--box-def-border, #cbd5e1) !important;
-  color: var(--box-def-text, #1e293b) !important;
-}
-
-.blog-rendered-content .box.definition p {
-  color: var(--box-def-text, #1e293b) !important;
-}
-
-.blog-rendered-content .box-title {
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-weight: 700 !important;
-  font-size: 1.05rem !important;
-  margin-bottom: 0.5rem !important;
-  display: block !important;
-}
-
-/* Embedded Data Tables */
-.blog-rendered-c/* Allow embedded styles to override wrapper defaults */
-.blog-rendered-content {
-  padding: 0 !important;
-  margin: 0 !important;
-  background: transparent !important;
-}
-
-/* Optional height restriction for feed cards without slicing HTML tags */
-.blog-rendered-content.feed-mode-preview {
-  max-height: 520px;
+.raw-html-post-wrapper {
+  width: 100%;
+  margin-bottom: 32px;
+  background: #0f172a;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.iframe-container {
+  width: 100%;
   position: relative;
+  overflow: hidden;
+  background: #ffffff;
 }
 
-.blog-rendered-content.feed-mode-preview::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 90px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95));
-  pointer-events: none;
-}ontent table {
-  width: 100% !important;
-  border-collapse: collapse !important;
-  margin: 1.25rem 0 !important;
+.feed-preview-frame {
+  max-height: 450px;
+  overflow: hidden;
 }
 
-.blog-rendered-content th,
-.blog-rendered-content td {
-  padding: 10px 14px !important;
-  border: 1px solid var(--border-color, #e2e8f0) !important;
-  text-align: left !important;
+.raw-html-canvas {
+  width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
 }
 
-.blog-rendered-content th {
-  background-color: var(--table-header-bg, #f8fafc) !important;
-  color: var(--heading-color, #0f172a) !important;
+.raw-footer {
+  border-top: 1px solid #1e293b !important;
+  background-color: #0f172a !important;
+  padding: 14px 24px !important;
 }

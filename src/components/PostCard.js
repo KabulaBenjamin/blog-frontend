@@ -1,9 +1,9 @@
-// File Location: src/components/PostCard.jsx
-import React, { useState } from 'react';
+// File Location: src/components/PostCard.js
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import parse from 'html-react-parser';
 import DOMPurify from 'dompurify';
-import he from 'he'; // HTML entity decoder
+import he from 'he';
 
 // CSS Imports
 import 'katex/dist/katex.min.css';
@@ -11,9 +11,11 @@ import './PostCard.css';
 
 function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const navigate = useNavigate();
+  const iframeRef = useRef(null);
   const [commentText, setCommentText] = useState('');
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
+  const [iframeHeight, setIframeHeight] = useState(isFeedMode ? 450 : 800);
 
   const isOwner = user && String(user.id) === String(post?.user_id);
 
@@ -28,10 +30,34 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const theme = categoryTheme[post?.category] || categoryTheme.tech;
   const hasLiked = post?.liked_by_users?.includes(user?.id);
 
+  // Decode HTML entities (&lt;p&gt; -> <p>)
+  const decodedContent = he.decode(post?.content || '');
+
+  // Detect if the content is a full/custom HTML document layout
+  const isRawHtmlPost = 
+    decodedContent.includes('<header') || 
+    decodedContent.includes('class="hero"') || 
+    decodedContent.includes('sanctuary-post-root') ||
+    decodedContent.includes('<!DOCTYPE html>') ||
+    decodedContent.includes('<style>');
+
+  // Auto-adjust iframe height to match internal document content seamlessly
+  const handleIframeLoad = () => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      try {
+        const bodyHeight = iframeRef.current.contentWindow.document.body.scrollHeight;
+        if (bodyHeight > 0 && !isFeedMode) {
+          setIframeHeight(bodyHeight + 20);
+        }
+      } catch (err) {
+        console.log('Cross-origin/Iframe height auto-fit skipped:', err);
+      }
+    }
+  };
+
   const handleLike = async () => {
     if (isLiking || !user) return;
     setIsLiking(true);
-
     try {
       const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}/like`, { 
         method: 'POST',
@@ -49,7 +75,6 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!commentText.trim()) return;
-
     try {
       const res = await fetch(`https://blog-2y55.onrender.com/posts/${post.id}/comment`, {
         method: 'POST',
@@ -82,138 +107,167 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const handleShare = () => {
     const postUrl = `${window.location.origin}/posts/${post.id}`;
     if (navigator.share) {
-      navigator.share({
-        title: post.title,
-        url: postUrl
-      }).catch(err => console.log('Share canceled:', err));
+      navigator.share({ title: post.title, url: postUrl }).catch(err => console.log('Share canceled:', err));
     } else {
       navigator.clipboard.writeText(postUrl).then(() => alert('Link copied!'));
     }
   };
 
-  // 1. Decode HTML entities (&lt;p&gt; -> <p>)
-  const decodedContent = he.decode(post?.content || '');
-
-  // 2. Configure DOMPurify to keep <style> blocks, head styles, and custom attributes
-  const cleanHtml = DOMPurify.sanitize(decodedContent, {
-    ADD_TAGS: ['style', 'details', 'summary', 'header', 'nav', 'article', 'section', 'main', 'aside'],
-    ADD_ATTR: ['class', 'id', 'style', 'open', 'aria-label', 'target', 'rel', 'colspan', 'rowspan'],
-    FORCE_BODY: false
-  });
-
-  // 3. Detect if post content contains a custom header hero element
-  const hasEmbeddedHero = cleanHtml.includes('class="hero"') || cleanHtml.includes('sanctuary-post-root');
-
   const commentsCount = Array.isArray(post?.comments) ? post.comments.length : (post?.comments || 0);
 
-  return (
-    <div className={`post-card ${isFeedMode ? 'feed-mode-card' : ''}`}>
-      
-      {/* Conditionally hide top banner wrapper if raw HTML brings its own header hero layout */}
-      {!hasEmbeddedHero && (
-        <div className="post-card-hero">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
-            <span className="pill-category" style={{ background: theme.bg, color: theme.color, padding: '4px 10px', borderRadius: '12px' }}>
-              {theme.label}
-            </span>
+  // Inject standard CSS resets into the iframe head to fix browser margins
+  const fullDocumentSource = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+          }
+        </style>
+      </head>
+      <body>
+        ${decodedContent}
+      </body>
+    </html>
+  `;
 
-            {post?.tags && post.tags.trim() !== "" && post.tags.split(',').map((tag, idx) => (
-              <span key={idx} style={{ 
-                fontSize: '11px', 
-                background: 'rgba(255, 255, 255, 0.1)', 
-                color: '#cbd5e1', 
-                padding: '2px 8px', 
-                borderRadius: '4px',
-                fontWeight: '500'
-              }}>
-                #{tag.trim()}
-              </span>
-            ))}
-          </div>
+  // =========================================================================
+  // 1. RAW HTML IFRAME MODE (100% Localhost Identical)
+  // =========================================================================
+  if (isRawHtmlPost) {
+    return (
+      <div className="raw-html-post-wrapper">
+        <div className={`iframe-container ${isFeedMode ? 'feed-preview-frame' : ''}`}>
+          <iframe
+            ref={iframeRef}
+            srcDoc={fullDocumentSource}
+            title={post?.title || "Custom HTML Post"}
+            onLoad={handleIframeLoad}
+            style={{
+              width: '100%',
+              height: isFeedMode ? '450px' : `${iframeHeight}px`,
+              border: 'none',
+              display: 'block'
+            }}
+            sandbox="allow-scripts allow-same-origin"
+          />
+        </div>
 
-          <h2 style={{ cursor: 'pointer' }} onClick={() => navigate(`/posts/${post.id}`)}>
-            {post?.title}
-          </h2>
-
-          <div className="hero-meta">
-            <span>BY: {post?.username || 'UNKNOWN'}</span>
-            <span>👍 {post?.likes || 0} LIKES</span>
-            <span>💬 {commentsCount} COMMENTS</span>
+        {/* Action Controls Footer */}
+        <div className="post-card-footer raw-footer">
+          <div className="actions">
+            {isFeedMode ? (
+              <button onClick={() => navigate(`/posts/${post.id}`)} className="btn-primary">
+                Read Full Post
+              </button>
+            ) : (
+              <>
+                <button onClick={handleLike} disabled={isLiking || !user} className="btn-secondary">
+                  {isLiking ? 'Saving...' : hasLiked ? '❤️ Liked' : '👍 Like'}
+                </button>
+                <button onClick={() => setShowCommentBox(!showCommentBox)} className="btn-secondary">
+                  Comment
+                </button>
+              </>
+            )}
+            <button onClick={handleShare} className="btn-secondary">Share</button>
+            {isOwner && (
+              <>
+                <button onClick={() => navigate(`/edit/${post.id}`)} className="btn-outline">Edit</button>
+                <button onClick={handleDelete} className="btn-danger">Delete</button>
+              </>
+            )}
           </div>
         </div>
-      )}
 
-      {/* 2. UNMODIFIED RENDERED CONTENT BODY */}
+        {showCommentBox && !isFeedMode && (
+          <form onSubmit={handleCommentSubmit} className="comment-form">
+            <input 
+              type="text" 
+              placeholder="Write a comment..." 
+              value={commentText} 
+              onChange={(e) => setCommentText(e.target.value)}
+            />
+            <button type="submit" className="btn-primary">Post</button>
+          </form>
+        )}
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 2. STANDARD CARD MODE (For simple formatted text)
+  // =========================================================================
+  const cleanHtml = DOMPurify.sanitize(decodedContent);
+
+  return (
+    <div className="post-card">
+      <div className="post-card-hero">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
+          <span className="pill-category" style={{ background: theme.bg, color: theme.color, padding: '4px 10px', borderRadius: '12px' }}>
+            {theme.label}
+          </span>
+          {post?.tags && post.tags.trim() !== "" && post.tags.split(',').map((tag, idx) => (
+            <span key={idx} style={{ fontSize: '11px', background: 'rgba(255, 255, 255, 0.1)', color: '#cbd5e1', padding: '2px 8px', borderRadius: '4px', fontWeight: '500' }}>
+              #{tag.trim()}
+            </span>
+          ))}
+        </div>
+
+        <h2 style={{ cursor: 'pointer' }} onClick={() => navigate(`/posts/${post.id}`)}>
+          {post?.title}
+        </h2>
+
+        <div className="hero-meta">
+          <span>BY: {post?.username || 'UNKNOWN'}</span>
+          <span>👍 {post?.likes || 0} LIKES</span>
+          <span>💬 {commentsCount} COMMENTS</span>
+        </div>
+      </div>
+
       <div className={`blog-rendered-content ql-editor ${isFeedMode ? 'feed-mode-preview' : ''}`}>
         {parse(cleanHtml)}
       </div>
 
-      {post?.live_link && (
-        <div style={{ padding: '0 32px 16px 32px', backgroundColor: '#0f0f11' }}>
-          🔗 <a href={post.live_link} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>Live Project Link</a>
-        </div>
-      )}
-
-      {/* 3. CARD FOOTER & ACTIONS */}
       <div className="post-card-footer">
         <div className="actions">
           {isFeedMode ? (
-            <button onClick={() => navigate(`/posts/${post.id}`)} style={{ background: '#007bff', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
-              Read Full Post
-            </button>
+            <button onClick={() => navigate(`/posts/${post.id}`)} className="btn-primary">Read Full Post</button>
           ) : (
             <>
-              <button 
-                onClick={handleLike} 
-                disabled={isLiking || !user}
-                style={{ 
-                  background: hasLiked ? '#cbd5e1' : '#e2e8f0', 
-                  color: hasLiked ? '#0f172a' : '#334155', 
-                  border: 'none', 
-                  padding: '8px 16px', 
-                  borderRadius: '4px', 
-                  cursor: isLiking || !user ? 'not-allowed' : 'pointer', 
-                  fontWeight: '600' 
-                }}
-              >
+              <button onClick={handleLike} disabled={isLiking || !user} className="btn-secondary">
                 {isLiking ? 'Saving...' : hasLiked ? '❤️ Liked' : '👍 Like'}
               </button>
-              <button onClick={() => setShowCommentBox(!showCommentBox)} style={{ background: '#e2e8f0', color: '#334155', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
-                Comment
-              </button>
+              <button onClick={() => setShowCommentBox(!showCommentBox)} className="btn-secondary">Comment</button>
             </>
           )}
-          <button onClick={handleShare} style={{ background: '#e2e8f0', color: '#334155', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
-            Share
-          </button>
+          <button onClick={handleShare} className="btn-secondary">Share</button>
           {isOwner && (
             <>
-              <button onClick={() => navigate(`/edit/${post.id}`)} style={{ background: '#fff', color: '#334155', border: '1px solid #cbd5e1', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
-                Edit
-              </button>
-              <button onClick={handleDelete} style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
-                Delete
-              </button>
+              <button onClick={() => navigate(`/edit/${post.id}`)} className="btn-outline">Edit</button>
+              <button onClick={handleDelete} className="btn-danger">Delete</button>
             </>
           )}
         </div>
       </div>
 
       {showCommentBox && !isFeedMode && (
-        <form onSubmit={handleCommentSubmit} style={{ padding: '0 28px 20px 28px', display: 'flex', gap: '8px', backgroundColor: '#0b131e' }}>
+        <form onSubmit={handleCommentSubmit} className="comment-form">
           <input 
             type="text" 
             placeholder="Write a comment..." 
             value={commentText} 
             onChange={(e) => setCommentText(e.target.value)}
-            style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#1e293b', color: '#fff' }}
           />
-          <button type="submit" style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            Post
-          </button>
+          <button type="submit" className="btn-primary">Post</button>
         </form>
       )}
-
     </div>
   );
 }
