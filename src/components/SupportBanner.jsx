@@ -47,14 +47,14 @@ export default function SupportBanner() {
         </button>
       </div>
       <p style={{ fontSize: '0.85rem', color: '#cbd5e1', margin: 0, lineHeight: '1.4' }}>
-        Enjoying the content? Help keep this community ad-free and open for all publishers.
+        Enjoying the content? Help keep this community ad-free and open. Donate via M-Pesa (Pochi): <strong>+254 798 030 091</strong>
       </p>
       <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
         <button 
           onClick={() => { handleDismiss(); navigate('/donate'); }}
           style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}
         >
-          Support Us
+          View All Options
         </button>
         <button 
           onClick={handleDismiss}
