@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import parse from 'html-react-parser';
 import DOMPurify from 'dompurify';
 import he from 'he';
+import FollowButton from './FollowButton'; // 👥 Import Follow Button
 
 // CSS Imports
 import 'katex/dist/katex.min.css';
@@ -17,7 +18,8 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const [isLiking, setIsLiking] = useState(false);
   const [iframeHeight, setIframeHeight] = useState(isFeedMode ? 450 : 800);
 
-  const isOwner = user && String(user.id) === String(post?.user_id);
+  const authorId = post?.user_id || post?.author_id;
+  const isOwner = user && String(user.id) === String(authorId);
 
   // Category Theme Helper Map
   const categoryTheme = {
@@ -172,8 +174,25 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
           {post?.title}
         </h1>
 
-        <div className="hero-meta">
-          <span>BY: {post?.username || 'UNKNOWN'}</span>
+        <div className="hero-meta" style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+          
+          {/* 👤 Clickable Author Name */}
+          <span 
+            onClick={() => authorId && navigate(`/authors/${authorId}`)} 
+            style={{ cursor: authorId ? 'pointer' : 'default', textDecoration: authorId ? 'underline' : 'none', fontWeight: 'bold' }}
+            title={authorId ? "View author profile" : ""}
+          >
+            BY: {post?.username || 'UNKNOWN'}
+          </span>
+          
+          {/* 👥 Follow Button Component (Hidden if viewer is the author) */}
+          {!isOwner && authorId && (
+            <FollowButton 
+              currentUserId={user?.id} 
+              authorId={authorId} 
+            />
+          )}
+
           <span>👍 {post?.likes || 0} LIKES</span>
           <span>💬 {commentsCount} COMMENTS</span>
         </div>

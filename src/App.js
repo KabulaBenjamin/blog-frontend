@@ -33,6 +33,7 @@ import Dashboard from './pages/Dashboard';    // 📊 New publisher analytics da
 import AdminDashboard from './pages/AdminDashboard'; // 👑 Superuser control center
 import PostDetail from './pages/PostDetail';  // 📝 Dedicated single post details page
 import Donate from './pages/Donate';          // 💳 Community donation page
+import AuthorProfile from './components/AuthorProfile';
 
 // Added Navigate here to protect client-side routes gracefully
 import { BrowserRouter as Router, Routes, Route, useParams, Navigate } from 'react-router-dom';
@@ -272,6 +273,7 @@ function App() {
                 {/* Application Feature Routes */}
                 <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
                 <Route path="/notifications" element={<Notifications user={user} />} />
+                <Route path="/authors/:authorId" element={<AuthorProfile currentUser={user} />} />
                 
                 {/* 🛠️ Identity Updates and State synchronization */}
                 <Route 
@@ -313,6 +315,7 @@ function App() {
                 {/* Authentication Nodes */}
                 <Route path="/signin" element={<Signin onSignedIn={setUser} />} />
                 <Route path="/signup" element={<Signup onSignedUp={setUser} />} />
+                
 
                 {/* Static Legal Disclosures & App Context Pages */}
                 <Route path="/about" element={<About />} />
