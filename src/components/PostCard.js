@@ -21,6 +21,9 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const authorId = post?.user_id || post?.author_id;
   const isOwner = user && String(user.id) === String(authorId);
 
+  // Dynamic Identifier (Slug preferred for SEO, falls back to numeric ID)
+  const postIdentifier = post?.slug || post?.id;
+
   // Category Theme Helper Map
   const categoryTheme = {
     tech: { bg: '#e3f2fd', color: '#0d47a1', label: '💻 Tech' },
@@ -107,7 +110,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   };
 
   const handleShare = () => {
-    const postUrl = `${window.location.origin}/posts/${post.id}`;
+    const postUrl = `${window.location.origin}/posts/${postIdentifier}`;
     if (navigator.share) {
       navigator.share({ title: post.title, url: postUrl }).catch(err => console.log('Share canceled:', err));
     } else {
@@ -117,17 +120,25 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
 
   const commentsCount = Array.isArray(post?.comments) ? post.comments.length : (post?.comments || 0);
 
-  // Safe Bottom Navigation (Falls back to Home if adjacent ID doesn't exist)
+  // Safe Bottom Navigation
   const handleGoHome = () => navigate('/');
   const handlePrevPost = () => {
-    if (post?.prevPostId) navigate(`/posts/${post.prevPostId}`);
-    else if (post?.id && Number(post.id) > 1) navigate(`/posts/${Number(post.id) - 1}`);
-    else navigate('/');
+    if (post?.prevSlug || post?.prevPostId) {
+      navigate(`/posts/${post.prevSlug || post.prevPostId}`);
+    } else if (post?.id && Number(post.id) > 1) {
+      navigate(`/posts/${Number(post.id) - 1}`);
+    } else {
+      navigate('/');
+    }
   };
   const handleNextPost = () => {
-    if (post?.nextPostId) navigate(`/posts/${post.nextPostId}`);
-    else if (post?.id) navigate(`/posts/${Number(post.id) + 1}`);
-    else navigate('/');
+    if (post?.nextSlug || post?.nextPostId) {
+      navigate(`/posts/${post.nextSlug || post.nextPostId}`);
+    } else if (post?.id) {
+      navigate(`/posts/${Number(post.id) + 1}`);
+    } else {
+      navigate('/');
+    }
   };
 
   const fullDocumentSource = `
@@ -191,7 +202,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
           ))}
         </div>
 
-        <h1 className="hero-title" onClick={() => navigate(`/posts/${post.id}`)}>
+        <h1 className="hero-title" onClick={() => navigate(`/posts/${postIdentifier}`)}>
           {post?.title}
         </h1>
 
@@ -246,7 +257,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
       <div className="post-card-footer">
         <div className="actions">
           {isFeedMode ? (
-            <button onClick={() => navigate(`/posts/${post.id}`)} className="btn-primary">
+            <button onClick={() => navigate(`/posts/${postIdentifier}`)} className="btn-primary">
               Read Full Post
             </button>
           ) : (
