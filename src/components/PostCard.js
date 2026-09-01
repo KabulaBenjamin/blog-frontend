@@ -16,7 +16,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
   const [commentText, setCommentText] = useState('');
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
-  const [iframeHeight, setIframeHeight] = useState(isFeedMode ? 450 : 800);
+  const [iframeHeight, setIframeHeight] = useState(isFeedMode ? 350 : 800);
 
   const authorId = post?.user_id || post?.author_id;
   const isOwner = user && String(user.id) === String(authorId);
@@ -117,10 +117,18 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
 
   const commentsCount = Array.isArray(post?.comments) ? post.comments.length : (post?.comments || 0);
 
-  // Bottom Navigation
+  // Safe Bottom Navigation (Falls back to Home if adjacent ID doesn't exist)
   const handleGoHome = () => navigate('/');
-  const handlePrevPost = () => post?.id && navigate(`/posts/${Number(post.id) - 1}`);
-  const handleNextPost = () => post?.id && navigate(`/posts/${Number(post.id) + 1}`);
+  const handlePrevPost = () => {
+    if (post?.prevPostId) navigate(`/posts/${post.prevPostId}`);
+    else if (post?.id && Number(post.id) > 1) navigate(`/posts/${Number(post.id) - 1}`);
+    else navigate('/');
+  };
+  const handleNextPost = () => {
+    if (post?.nextPostId) navigate(`/posts/${post.nextPostId}`);
+    else if (post?.id) navigate(`/posts/${Number(post.id) + 1}`);
+    else navigate('/');
+  };
 
   const fullDocumentSource = `
     <!DOCTYPE html>
@@ -153,6 +161,19 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
     ADD_ATTR: ['class', 'id', 'style', 'open', 'aria-label', 'target', 'rel', 'colspan', 'rowspan', 'xmlns', 'viewBox', 'd', 'fill'],
     FORCE_BODY: false
   });
+
+  // Truncate non-iframe content cleanly for feed mode previews
+  const getDisplayContent = () => {
+    if (!isFeedMode) return cleanHtml;
+
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = cleanHtml;
+    const rawText = tempDiv.textContent || tempDiv.innerText || '';
+
+    return rawText.length > 200 
+      ? `<p>${rawText.slice(0, 200)}...</p>` 
+      : cleanHtml;
+  };
 
   return (
     <div className={`post-card ${!isFeedMode ? 'full-screen-mode' : 'feed-mode-card'}`}>
@@ -208,7 +229,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
             onLoad={handleIframeLoad}
             style={{
               width: '100%',
-              height: isFeedMode ? '450px' : `${iframeHeight}px`,
+              height: isFeedMode ? '350px' : `${iframeHeight}px`,
               border: 'none',
               display: 'block'
             }}
@@ -217,7 +238,7 @@ function PostCard({ post, user, onUpdated, onDeleted, isFeedMode = false }) {
         </div>
       ) : (
         <div className={`blog-rendered-content ql-editor ${isFeedMode ? 'feed-mode-preview' : ''}`}>
-          {parse(cleanHtml)}
+          {parse(getDisplayContent())}
         </div>
       )}
 
